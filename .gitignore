@@ -1,0 +1,143 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+pip-wheel-metadata/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# Virtual Environments
+venv/
+.venv
+env/
+ENV/
+env.bak/
+venv.bak/
+.virtualenv
+
+# IDE and Editors
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+*.sublime-project
+*.sublime-workspace
+
+# Environment and Configuration
+.env
+.env.local
+.env.*.local
+*.config
+
+# Jupyter/IPython
+.ipynb_checkpoints/
+*.ipynb_checkpoints
+.ipykernel.killer
+*.ipynb
+
+# Model and Data Files (Large/Sensitive)
+*.safetensors
+*.bin
+*.pt
+*.pth
+*.ckpt
+*.model
+*.h5
+*.pkl
+*.pickle
+*.joblib
+models/checkpoints/
+models/pretrained/
+model_cache/
+huggingface_cache/
+.cache/
+
+# Data and Datasets
+data/
+datasets/
+*.csv
+*.json
+*.jsonl
+!examples/
+
+# Project-Specific Outputs
+demo_text_output.json
+demo_image_output.json
+demo_multimodal_output.json
+outputs/
+results/
+logs/
+temp/
+tmp/
+
+# GPU Memory and Performance Logs
+memory_stats.log
+gpu_logs/
+*.log
+
+# Cache
+.cache
+*.cache
+cache/
+
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+.hypothesis/
+
+# macOS
+.AppleDouble
+.LSOverride
+._*
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# Package Management
+pip-log.txt
+pip-delete-this-directory.txt
+poetry.lock
+Pipfile.lock
+
+# Node modules (if any frontend exists)
+node_modules/
+npm-debug.log
+
+# OS Temp Files
+*.tmp
+*.bak
+*.swp
+*~.nib
+
+# Database files
+*.db
+*.sqlite
+*.sqlite3
+
+# Backup files
+*.backup
+*.bk
