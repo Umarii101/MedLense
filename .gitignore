@@ -25,15 +25,16 @@ MANIFEST
 
 # Virtual Environments
 venv/
-.venv
+.venv/
 env/
 ENV/
 env.bak/
 venv.bak/
-.virtualenv
+.virtualenv/
 
 # IDE and Editors
-.vscode/
+.vscode/*
+!.vscode/settings.json
 .idea/
 *.swp
 *.swo
@@ -47,40 +48,35 @@ Thumbs.db
 .env
 .env.local
 .env.*.local
-*.config
 
 # Jupyter/IPython
 .ipynb_checkpoints/
-*.ipynb_checkpoints
+*.ipynb_checkpoints/
 .ipykernel.killer
-*.ipynb
 
-# Model and Data Files (Large/Sensitive)
-*.safetensors
-*.bin
-*.pt
-*.pth
-*.ckpt
-*.model
-*.h5
-*.pkl
-*.pickle
-*.joblib
+# ============================================
+# Model Files (Large - Download Separately)
+# ============================================
+# HuggingFace cache
+.cache/
+huggingface_cache/
+model_cache/
+
+# Desktop model weights (downloaded on demand)
 models/checkpoints/
 models/pretrained/
-model_cache/
-huggingface_cache/
-.cache/
+*.bin
+*.h5
 
-# Data and Datasets
+# Edge deployment models (too large for Git)
+edge_deployment/models/biomedclip/*.onnx
+edge_deployment/models/medgemma/*.gguf
+
+# ============================================
+# Data and Outputs
+# ============================================
 data/
 datasets/
-*.csv
-*.json
-*.jsonl
-!examples/
-
-# Project-Specific Outputs
 demo_text_output.json
 demo_image_output.json
 demo_multimodal_output.json
@@ -90,23 +86,21 @@ logs/
 temp/
 tmp/
 
-# GPU Memory and Performance Logs
-memory_stats.log
-gpu_logs/
-*.log
-
-# Cache
-.cache
-*.cache
-cache/
-
-# Testing
+# ============================================
+# Testing and Development
+# ============================================
 .pytest_cache/
 .coverage
 htmlcov/
 .tox/
 .hypothesis/
+memory_stats.log
+gpu_logs/
+*.log
 
+# ============================================
+# OS Files
+# ============================================
 # macOS
 .AppleDouble
 .LSOverride
@@ -117,32 +111,20 @@ Thumbs.db
 ehthumbs.db
 Desktop.ini
 
-# Package Management
+# ============================================
+# Misc
+# ============================================
 pip-log.txt
 pip-delete-this-directory.txt
 poetry.lock
 Pipfile.lock
-
-# Node modules (if any frontend exists)
 node_modules/
 npm-debug.log
-
-# OS Temp Files
 *.tmp
 *.bak
-*.swp
 *~.nib
-
-# Database files
 *.db
 *.sqlite
 *.sqlite3
-setup.txt
-# Backup files
 *.backup
 *.bk
-
-Future Direction.txt
-# GGUF Quantized Models (Edge AI)
-*.gguf
-edge_deployment/models/

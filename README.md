@@ -8,39 +8,51 @@ Production-quality Python backend for offline clinical decision support using op
 
 This system assists healthcare professionals in low-resource settings. All outputs require clinical validation.
 
-## 🏗️ Architecture
+## 🏛️ Architecture
 
 ```
 Input Layer (Text + Images + Metadata)
-    ↓
-Image Encoder (RAD-DINO) → Embeddings
-    ↓
-MedGemma 7B Reasoning Engine → Clinical Understanding
-    ↓
-Safety & Framing Layer → Non-diagnostic Language
-    ↓
-Structured JSON Output
+    → Image Encoder (CLIP/BiomedCLIP) → Embeddings
+    → MedGemma 4B Reasoning Engine → Clinical Understanding
+    → Safety & Framing Layer → Non-diagnostic Language
+    → Structured JSON Output
 ```
 
-## 🧠 Models Used
+## 🤖 Models Used
 
-1. **Primary LLM**: `google/medgemma-7b` - Clinical reasoning
-2. **Image Encoder**: `microsoft/rad-dino` - Medical image features
-3. **Risk Model**: Lightweight sklearn baseline (optional)
+### Desktop/Server Deployment
+| Model | Purpose | Size |
+|-------|---------|------|
+| **google/medgemma-4b-it** | Clinical reasoning (8-bit quantized) | ~4GB VRAM |
+| **openai/clip-vit-large-patch14** | Medical image features | ~2GB VRAM |
+| Rule-based + sklearn | Risk stratification | Minimal |
+
+### Edge/Mobile Deployment
+| Model | Format | Size | Target |
+|-------|--------|------|--------|
+| **BiomedCLIP Vision** | ONNX INT8 | 84 MB | Android image embeddings |
+| **MedGemma 4B** | GGUF Q4_K_S | 2.2 GB | Android text generation |
 
 ## 💻 Hardware Requirements
 
-- **GPU**: NVIDIA RTX 3080 (10GB VRAM) or better
+### Desktop
+- **GPU**: NVIDIA RTX 3060+ (10GB+ VRAM recommended)
 - **RAM**: 16GB+ system RAM
 - **Storage**: 30GB for models
 - **CUDA**: 11.8+ with cuDNN
+
+### Mobile (Edge Deployment)
+- **Target**: Snapdragon 8s Gen 3 or equivalent
+- **RAM**: 8GB+
+- **Storage**: 3GB for quantized models
 
 ## 📦 Installation
 
 ```bash
 # Create virtual environment
 python -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
+venv\Scripts\activate  # Windows
+# source venv/bin/activate  # Linux/Mac
 
 # Install dependencies
 pip install -r requirements.txt
@@ -51,6 +63,7 @@ python -c "import torch; print(f'CUDA Available: {torch.cuda.is_available()}')"
 
 ## 🚀 Quick Start
 
+### Desktop Pipeline
 ```python
 from pipelines.multimodal_pipeline import MultimodalPipeline
 
@@ -62,41 +75,54 @@ result = pipeline.analyze_clinical_text(
     clinical_note="Patient presents with persistent cough..."
 )
 
-# Run image-assisted analysis
-result = pipeline.analyze_with_image(
-    clinical_note="...",
-    image_path="chest_xray.jpg"
-)
-
 print(result.model_dump_json(indent=2))
 ```
 
-## 📁 Project Structure
+### Edge Deployment Tests
+```bash
+# Test BiomedCLIP INT8
+python tests/test_biomedclip.py
+
+# Test MedGemma Q4_K_S
+python tests/test_medgemma.py
+
+# Run all edge tests
+python tests/run_all_tests.py
+```
+
+## 📂 Project Structure
 
 ```
 Project 1/
-├── models/
-│   ├── medgemma.py
-│   ├── image_encoder.py
-│   └── risk_model.py
-├── pipelines/
+├── models/                     # Desktop model loaders
+│   ├── medgemma.py            # MedGemma 4B inference
+│   ├── image_encoder.py       # CLIP/DINOv2 image features
+│   └── risk_model.py          # Risk scoring
+├── pipelines/                  # End-to-end workflows
 │   ├── clinical_text_pipeline.py
 │   ├── image_assist_pipeline.py
 │   └── multimodal_pipeline.py
-├── schemas/
+├── schemas/                    # Pydantic data models
 │   └── outputs.py
-├── utils/
-│   ├── safety.py
-│   └── memory.py
-├── examples/
-│   └── example_data.py
-├── main.py
+├── utils/                      # Utilities
+│   ├── safety.py              # Safety mechanisms
+│   └── memory.py              # GPU memory management
+├── edge_deployment/            # Mobile/edge models
+│   ├── models/
+│   │   ├── biomedclip/        # ONNX INT8 (84 MB)
+│   │   └── medgemma/          # GGUF Q4_K_S (2.2 GB)
+│   └── README.md
+├── tests/                      # Validation tests
+│   ├── test_biomedclip.py     # BiomedCLIP INT8 tests
+│   ├── test_medgemma.py       # MedGemma Q4_K_S tests
+│   └── run_all_tests.py       # Full test suite
+├── test_images/                # Sample test images
+├── examples/                   # Example data
+├── main.py                     # Demo script
 ├── requirements.txt
 ├── README.md
 ├── DOCUMENTATION.md
-├── SETUP_GUIDE.md
-├── PROJECT_SUMMARY.md
-└── DELIVERY_SUMMARY.md
+└── SETUP_GUIDE.md
 ```
 
 ## 🛡️ Safety Features
@@ -123,15 +149,15 @@ Project 1/
     "Consider pulmonary function test",
     "Review allergy medication compliance"
   ],
-  "clinical_notes": "⚠️ ASSISTIVE ONLY - Requires clinical validation by licensed provider"
+  "clinical_notes": "⚠️ ASSISTIVE ONLY - Requires clinical validation"
 }
 ```
 
-## 🎥 Competition Alignment
+## 🎬 Competition Alignment
 
-✅ Uses open-weight models only (no cloud APIs)
+✅ Uses open-weight MedGemma model
 ✅ Runs offline on local GPU
-✅ Demonstrates MedGemma capabilities
+✅ Edge deployment ready (Android)
 ✅ Suitable for low-resource healthcare settings
 ✅ Reproducible and well-documented
 
@@ -141,4 +167,4 @@ MIT License - See LICENSE file
 
 ## ⚠️ Medical Disclaimer
 
-This software is for research and assistive purposes only. Not FDA approved. Not a substitute for professional medical judgment. All outputs must be validated by licensed healthcare providers.
+This system is for **assistive purposes only**. It is NOT FDA approved and is NOT a substitute for professional medical judgment. All outputs require validation by licensed healthcare providers.

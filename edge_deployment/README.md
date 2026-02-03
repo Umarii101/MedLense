@@ -1,17 +1,82 @@
-﻿# Edge Deployment - MedGemma
+# Edge Deployment
 
-## Quantized Model
-- **Model**: medgemma-4b-q4_k_s-final.gguf (2.21GB)
-- **Quantization**: Q4_K_S (4-bit k-quant)
-- **Original Size**: 8.6GB to 2.21GB (74% reduction)
-- **Target**: Realme GT Neo 6 (Snapdragon 8s Gen 3)
-- **Performance**: ~15-30+ tok/s expected on mobile NPU
+Quantized models optimized for mobile/edge deployment on Android devices.
 
-## Scripts
-- simple_test.py - Test inference with Gemma 3 chat template
-- quantize_gguf.py - Create quantized GGUF from F16 base
+## Models
 
-## Model NOT included in Git
-The .gguf model file is excluded from Git (too large: 2.21GB).
-Download or recreate using the quantization scripts.
+| Model | Format | Size | Quantization | Target |
+|-------|--------|------|--------------|--------|
+| **BiomedCLIP Vision** | ONNX INT8 | 84 MB | Dynamic INT8 | Image embeddings |
+| **BiomedCLIP Vision** | ONNX FP32 | 329 MB | None (baseline) | Reference |
+| **MedGemma 4B** | GGUF Q4_K_S | 2.2 GB | 4-bit k-quant | Text generation |
 
+## Quick Start
+
+### Test BiomedCLIP
+```bash
+python tests/test_biomedclip.py
+```
+
+### Test MedGemma
+```bash
+python tests/test_medgemma.py
+```
+
+### Run All Tests
+```bash
+python tests/run_all_tests.py
+```
+
+## Model Details
+
+### BiomedCLIP Vision (INT8)
+- **Source**: microsoft/BiomedCLIP-PubMedBERT_256-vit_base_patch16_224
+- **Architecture**: ViT-B/16
+- **Input**: 224x224 RGB image (NCHW format)
+- **Output**: 512-dim embedding vector
+- **Accuracy**: 99.95% cosine similarity vs FP32
+- **Inference**: ~110ms CPU, ~30-50ms with NNAPI
+
+### MedGemma 4B (Q4_K_S)
+- **Source**: google/medgemma-4b-it
+- **Quantization**: Q4_K_S (4-bit k-quant small)
+- **Original Size**: 8.6 GB → 2.2 GB (74% reduction)
+- **Context**: 2048 tokens
+- **Speed**: 15-30+ tok/s on mobile NPU
+
+## Android Integration
+
+### BiomedCLIP with ONNX Runtime
+```gradle
+implementation 'com.microsoft.onnxruntime:onnxruntime-android:1.16.0'
+```
+
+### MedGemma with llama.cpp
+Use [llama.cpp Android bindings](https://github.com/ggerganov/llama.cpp) or MLC-LLM.
+
+## File Structure
+```
+edge_deployment/
+├── models/
+│   ├── biomedclip/
+│   │   ├── biomedclip_vision_int8.onnx  # Production (84 MB)
+│   │   └── biomedclip_vision.onnx       # Baseline (329 MB)
+│   └── medgemma/
+│       └── medgemma-4b-q4_k_s-final.gguf
+├── scripts/
+│   ├── quantize_gguf.py
+│   └── simple_test.py
+└── README.md
+```
+
+## Hardware Requirements
+
+**Target Device**: Realme GT Neo 6 (Snapdragon 8s Gen 3)
+- CPU: 4x Cortex-A720 + 4x Cortex-A520
+- GPU: Adreno 735
+- NPU: Hexagon NPU
+- RAM: 8-12 GB
+
+**Expected Performance**:
+- BiomedCLIP: 30-50ms inference (NNAPI)
+- MedGemma: 15-30 tok/s (CPU/NPU)
