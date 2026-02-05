@@ -2,6 +2,25 @@
 
 Quantized models optimized for mobile/edge deployment on Android devices.
 
+## 📥 Model Downloads
+
+Models are too large for Git. Download from Google Drive:
+
+**[📁 Download Models (Google Drive)](https://drive.google.com/YOUR_LINK_HERE)**
+
+| File | Size | Description |
+|------|------|-------------|
+| `biomedclip_vision_int8.onnx` | 84 MB | Production model |
+| `biomedclip_vision.onnx` | 329 MB | FP32 baseline (optional) |
+| `medgemma-4b-q4_k_s-final.gguf` | 2.2 GB | Quantized LLM |
+
+After download, place files in:
+```
+edge_deployment/models/biomedclip/biomedclip_vision_int8.onnx
+edge_deployment/models/biomedclip/biomedclip_vision.onnx
+edge_deployment/models/medgemma/medgemma-4b-q4_k_s-final.gguf
+```
+
 ## Models
 
 | Model | Format | Size | Quantization | Target |
@@ -12,18 +31,12 @@ Quantized models optimized for mobile/edge deployment on Android devices.
 
 ## Quick Start
 
-### Test BiomedCLIP
 ```bash
+# Verify models are in place
 python tests/test_biomedclip.py
-```
-
-### Test MedGemma
-```bash
 python tests/test_medgemma.py
-```
 
-### Run All Tests
-```bash
+# Run all tests
 python tests/run_all_tests.py
 ```
 
@@ -35,14 +48,14 @@ python tests/run_all_tests.py
 - **Input**: 224x224 RGB image (NCHW format)
 - **Output**: 512-dim embedding vector
 - **Accuracy**: 99.95% cosine similarity vs FP32
-- **Inference**: ~110ms CPU, ~30-50ms with NNAPI
+- **Inference**: ~100ms CPU, ~30-50ms with NNAPI
 
 ### MedGemma 4B (Q4_K_S)
 - **Source**: google/medgemma-4b-it
 - **Quantization**: Q4_K_S (4-bit k-quant small)
 - **Original Size**: 8.6 GB → 2.2 GB (74% reduction)
 - **Context**: 2048 tokens
-- **Speed**: 15-30+ tok/s on mobile NPU
+- **Speed**: 9+ tok/s CPU, 15-30+ tok/s on mobile NPU
 
 ## Android Integration
 
@@ -55,6 +68,7 @@ implementation 'com.microsoft.onnxruntime:onnxruntime-android:1.16.0'
 Use [llama.cpp Android bindings](https://github.com/ggerganov/llama.cpp) or MLC-LLM.
 
 ## File Structure
+
 ```
 edge_deployment/
 ├── models/
@@ -63,9 +77,6 @@ edge_deployment/
 │   │   └── biomedclip_vision.onnx       # Baseline (329 MB)
 │   └── medgemma/
 │       └── medgemma-4b-q4_k_s-final.gguf
-├── scripts/
-│   ├── quantize_gguf.py
-│   └── simple_test.py
 └── README.md
 ```
 
@@ -75,8 +86,8 @@ edge_deployment/
 - CPU: 4x Cortex-A720 + 4x Cortex-A520
 - GPU: Adreno 735
 - NPU: Hexagon NPU
-- RAM: 12 GB
+- RAM: 8-12 GB
 
 **Expected Performance**:
 - BiomedCLIP: 30-50ms inference (NNAPI)
-- MedGemma: 15-30 tok/s (CPU/NPU)
+- MedGemma: 15-30 tok/s (NPU-accelerated)
