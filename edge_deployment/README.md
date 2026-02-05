@@ -75,7 +75,7 @@ edge_deployment/
 - CPU: 4x Cortex-A720 + 4x Cortex-A520
 - GPU: Adreno 735
 - NPU: Hexagon NPU
-- RAM: 8-12 GB
+- RAM: 12 GB
 
 **Expected Performance**:
 - BiomedCLIP: 30-50ms inference (NNAPI)

@@ -21,8 +21,8 @@
 
 ```bash
 # Clone and setup
-git clone https://github.com/[your-repo]/medgemma-edge.git
-cd medgemma-edge
+git clone https://github.com/Umarii101/The-MedGemma-Impact-Challenge.git
+cd The-MedGemma-Impact-Challenge
 
 # Install dependencies
 pip install -r requirements.txt
