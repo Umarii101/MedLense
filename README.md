@@ -62,7 +62,11 @@ The Models that I have quantized are too large for Git. Download from Google Dri
 │   └── README.md
 │
 ├── android_app/              # Android demo application
-│   └── README.md
+│   ├── DEPLOYMENT_TECHNICAL_REPORT.md  # ⭐ Full build & debugging story
+│   ├── ROADMAP.md                      # Future optimization plans
+│   ├── app/src/main/cpp/              # C++ JNI bridge + CMake
+│   ├── app/src/main/java/             # Kotlin inference wrappers + UI
+│   └── build.gradle.kts
 │
 ├── tests/                    # Validation test suite
 │   ├── test_biomedclip.py
@@ -82,12 +86,12 @@ The Models that I have quantized are too large for Git. Download from Google Dri
 
 ## 📊 Key Results
 
-### Quantization Performance
+### On-Device Performance (Realme GT Neo 6, Snapdragon 8s Gen 3)
 
 | Model | Size | Accuracy | Speed |
 |-------|------|----------|-------|
-| BiomedCLIP INT8 | 84 MB | 99.95% vs FP32 | ~100ms CPU |
-| MedGemma Q4_K_S | 2.2 GB | High quality | 9+ tok/s CPU |
+| BiomedCLIP INT8 | 84 MB | 99.95% vs FP32 | 126 ms inference |
+| MedGemma Q4_K_S | 2.2 GB | High quality | 32.8 tok/s pp, 7.8 tok/s gen |
 
 ### Validated Tests
 
@@ -111,6 +115,8 @@ ALL TESTS PASSED ✅
 | Document | Description |
 |----------|-------------|
 | [EDGE_DEPLOYMENT.md](EDGE_DEPLOYMENT.md) | Full edge deployment story |
+| [android_app/DEPLOYMENT_TECHNICAL_REPORT.md](android_app/DEPLOYMENT_TECHNICAL_REPORT.md) | Android build challenges & solutions |
+| [android_app/ROADMAP.md](android_app/ROADMAP.md) | Future optimization roadmap |
 | [quantization/README.md](quantization/README.md) | Quantization methodology |
 | [benchmarks/README.md](benchmarks/README.md) | Performance measurements |
 | [docs/SETUP_GUIDE.md](docs/SETUP_GUIDE.md) | Development setup |
