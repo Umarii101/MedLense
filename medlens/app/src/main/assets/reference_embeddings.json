@@ -1,0 +1,68 @@
+{
+  "version": "1.0",
+  "model": "BiomedCLIP-PubMedBERT_256-vit_base_patch16_224",
+  "embedding_dim": 512,
+  "description": "Pre-computed BiomedCLIP vision embeddings for medical image classification. Replace these with actual embeddings computed from representative medical images.",
+  "conditions": [
+    {
+      "name": "Normal Chest X-Ray",
+      "category": "Radiology",
+      "description": "No significant abnormalities detected in chest radiograph",
+      "embeddings": []
+    },
+    {
+      "name": "Pneumonia",
+      "category": "Pulmonology",
+      "description": "Lung infection with consolidation or infiltrates visible on imaging",
+      "embeddings": []
+    },
+    {
+      "name": "Pleural Effusion",
+      "category": "Pulmonology",
+      "description": "Abnormal fluid accumulation in the pleural space",
+      "embeddings": []
+    },
+    {
+      "name": "Cardiomegaly",
+      "category": "Cardiology",
+      "description": "Enlarged cardiac silhouette on chest imaging",
+      "embeddings": []
+    },
+    {
+      "name": "Atelectasis",
+      "category": "Pulmonology",
+      "description": "Partial or complete collapse of lung tissue",
+      "embeddings": []
+    },
+    {
+      "name": "Pneumothorax",
+      "category": "Emergency Medicine",
+      "description": "Air in the pleural space causing lung collapse",
+      "embeddings": []
+    },
+    {
+      "name": "Skin Lesion — Benign",
+      "category": "Dermatology",
+      "description": "Non-cancerous skin growth or mark",
+      "embeddings": []
+    },
+    {
+      "name": "Skin Lesion — Suspicious",
+      "category": "Dermatology",
+      "description": "Skin lesion with features requiring further evaluation",
+      "embeddings": []
+    },
+    {
+      "name": "Retinal — Normal",
+      "category": "Ophthalmology",
+      "description": "Normal retinal appearance without pathological findings",
+      "embeddings": []
+    },
+    {
+      "name": "Diabetic Retinopathy",
+      "category": "Ophthalmology",
+      "description": "Retinal damage from diabetes with microaneurysms or hemorrhages",
+      "embeddings": []
+    }
+  ]
+}

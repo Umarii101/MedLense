@@ -15,7 +15,7 @@
 | **MedGemma 4B-IT** | 8.6 GB | 2.2 GB | 74% |
 | **BiomedCLIP** | 329 MB | 84 MB | 74% |
 
-**Target**: Android devices
+**Target**: Android devices — includes **MedLens**, a production MVVM app with 4 screens (Home, Image Analysis, Clinical Assistant, Reports), combined BiomedCLIP + MedGemma pipeline, and medical condition classification.
 
 ## 🚀 Quick Start
 
@@ -61,11 +61,17 @@ The Models that I have quantized are too large for Git. Download from Google Dri
 ├── benchmarks/               # Performance measurements
 │   └── README.md
 │
-├── android_app/              # Android demo application
+├── android_app/              # Android PoC application (test app)
 │   ├── DEPLOYMENT_TECHNICAL_REPORT.md  # ⭐ Full build & debugging story
 │   ├── ROADMAP.md                      # Future optimization plans
 │   ├── app/src/main/cpp/              # C++ JNI bridge + CMake
 │   ├── app/src/main/java/             # Kotlin inference wrappers + UI
+│   └── build.gradle.kts
+│
+├── medlens/                  # ⭐ MedLens — Production Android app
+│   ├── app/src/main/cpp/              # C++ JNI bridge (llama.cpp)
+│   ├── app/src/main/java/             # Kotlin MVVM (4 screens, 4 ViewModels)
+│   ├── app/src/main/assets/           # Reference embeddings
 │   └── build.gradle.kts
 │
 ├── tests/                    # Validation test suite

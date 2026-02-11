@@ -69,23 +69,7 @@
 
 ## 3. Challenges & Solutions
 
-### Challenge 1: Model Not Found on Device
-
-**Symptom**: MedGemma reported "model not found" after successful load of BiomedCLIP.
-
-**Root cause**: The GGUF filename on the phone was `medgemma-4b-q4_k_s-final.gguf` but the code referenced `medgemma-4b-q4_k_s.gguf`.
-
-**Fix**: Corrected `MODEL_FILENAME` constant, added multi-path search (app external files, `/sdcard/MedGemmaEdge/`, Downloads folder).
-
-### Challenge 2: Permission Denied (Error 13)
-
-**Symptom**: BiomedCLIP failed with error 13 when loading model files from external storage.
-
-**Root cause**: Android 11+ scoped storage restricts `/sdcard/` access. `READ_EXTERNAL_STORAGE` alone is insufficient.
-
-**Fix**: Added `MANAGE_EXTERNAL_STORAGE` permission with a runtime check and UI banner that guides the user to the system Settings page. On app resume, the permission state is re-checked and the banner auto-dismisses.
-
-### Challenge 3: Abysmal Inference Speed — 0.2 tok/s
+### Challenge 1: Abysmal Inference Speed — 0.2 tok/s
 
 This was the **critical blocker** and took multiple debugging rounds to resolve. The fix required identifying **three independent root causes** that each contributed to the 50× slowdown.
 
@@ -152,7 +136,7 @@ endif()
 
 **Fix**: Set `model_params.use_mmap = false` to force a sequential upfront read into malloc'd anonymous pages. Load time increases from 3s to ~5–9s, but inference runs at full memory bandwidth. Note: `use_mlock = true` was also attempted but Android apps lack `CAP_IPC_LOCK` (`RLIMIT_MEMLOCK` = 64 KB), so mlock silently fails.
 
-### Challenge 4: KleidIAI FetchContent Failure
+### Challenge 2: KleidIAI FetchContent Failure
 
 **Symptom**: CMake configure failed when `GGML_CPU_KLEIDIAI=ON`.
 
@@ -160,7 +144,7 @@ endif()
 
 **Fix**: `set(GGML_CPU_KLEIDIAI OFF CACHE BOOL "" FORCE)`.
 
-### Challenge 5: flash_attn API Change
+### Challenge 3: flash_attn API Change
 
 **Symptom**: Compilation error — `flash_attn` is not a member of `llama_context_params`.
 
