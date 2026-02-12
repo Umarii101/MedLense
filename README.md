@@ -21,8 +21,8 @@
 
 ```bash
 # Clone and setup
-git clone https://github.com/Umarii101/The-MedGemma-Impact-Challenge.git
-cd The-MedGemma-Impact-Challenge
+git clone https://github.com/Umarii101/Medlense.git
+cd Medlense
 
 #Download The quantized Models First, I have provided the link to the models below
 
