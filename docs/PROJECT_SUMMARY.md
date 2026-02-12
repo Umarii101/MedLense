@@ -100,22 +100,13 @@ This project delivers a **production-ready, offline-capable healthcare AI backen
 
 ```
 Project 1/
-├── medlens/                    # ⭐ Production Android app
+├── Medlens/                    # ⭐ Production Android app
+│   ├── APK/app-debug.apk     # Pre-built APK
 │   ├── app/src/main/java/com/medgemma/edge/
 │   └── README.md              # App architecture & build guide
-├── models/                     # Desktop model loaders
-│   ├── medgemma.py            # MedGemma 4B inference
-│   ├── image_encoder.py       # BiomedCLIP image features
-│   └── risk_model.py          # Risk scoring
-├── pipelines/                  # End-to-end workflows
-│   ├── clinical_text_pipeline.py
-│   ├── image_assist_pipeline.py
-│   └── multimodal_pipeline.py
-├── schemas/                    # Pydantic data models
-│   └── outputs.py
-├── utils/                      # Utilities
-│   ├── safety.py              # Safety mechanisms
-│   └── memory.py              # GPU memory management
+├── Inference Test App/         # PoC predecessor (historical)
+│   ├── DEPLOYMENT_TECHNICAL_REPORT.md
+│   └── ROADMAP.md
 ├── edge_deployment/            # Mobile/edge models & integration
 │   ├── models/
 │   │   ├── biomedclip/        # ONNX INT8 (84 MB)
@@ -125,33 +116,36 @@ Project 1/
 │   └── scripts/               # 9 conversion & validation scripts
 ├── benchmarks/                 # On-device performance measurements
 ├── tests/                      # Validation tests
-│   ├── test_biomedclip.py     # BiomedCLIP INT8 tests
-│   ├── test_medgemma.py       # MedGemma Q4_K_S tests
-│   └── run_all_tests.py       # Full test suite
-├── android_app/                # PoC predecessor (historical)
+│   ├── test_biomedclip.py
+│   ├── test_medgemma.py
+│   └── run_all_tests.py
+├── desktop_pipeline/           # Desktop/GPU prototype (RTX 3080)
+│   ├── main.py                # Demo script
+│   ├── models/                # MedGemma, BiomedCLIP, risk model loaders
+│   ├── pipelines/             # Text, image, multimodal analysis
+│   ├── schemas/               # Pydantic output models
+│   ├── utils/                 # Safety checks, memory management
+│   └── requirements.txt
 ├── docs/                       # Detailed documentation
-│   ├── DOCUMENTATION.md       # Technical deep dive
-│   ├── SETUP_GUIDE.md         # Environment setup
+│   ├── DOCUMENTATION.md
+│   ├── SETUP_GUIDE.md
 │   └── PROJECT_SUMMARY.md     # This file
-├── test_images/                # Sample test images
-├── examples/                   # Example data
-├── main.py                     # Demo script
-├── requirements.txt
 ├── README.md                   # Landing page
-└── EDGE_DEPLOYMENT.md          # Edge AI narrative
+├── EDGE_DEPLOYMENT.md          # Edge AI narrative
+└── LICENSE
 ```
 
 ## 🚀 Quick Start
 
 ```bash
 # 1. Install dependencies
-pip install -r requirements.txt
+pip install -r desktop_pipeline/requirements.txt
 
 # 2. Verify CUDA
 python -c "import torch; print(torch.cuda.is_available())"
 
 # 3. Run desktop demo
-python main.py
+python desktop_pipeline/main.py
 
 # 4. Test edge deployment models
 python tests/run_all_tests.py

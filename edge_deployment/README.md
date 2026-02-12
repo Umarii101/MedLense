@@ -65,7 +65,7 @@ implementation 'com.microsoft.onnxruntime:onnxruntime-android:1.19.0'
 ```
 
 ### MedGemma with llama.cpp
-Compiled from source as a static library via CMake `add_subdirectory()` with a C++ JNI bridge. See [medlens/README.md](../medlens/README.md) for build instructions and [android_app/DEPLOYMENT_TECHNICAL_REPORT.md](../android_app/DEPLOYMENT_TECHNICAL_REPORT.md) for the optimization story.
+Compiled from source as a static library via CMake `add_subdirectory()` with a C++ JNI bridge. See [Medlens/README.md](../Medlens/README.md) for build instructions and [Inference Test App/DEPLOYMENT_TECHNICAL_REPORT.md](../Inference%20Test%20App/DEPLOYMENT_TECHNICAL_REPORT.md) for the optimization story.
 
 ## File Structure
 

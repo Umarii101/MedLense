@@ -91,7 +91,7 @@ Key decisions:
 
 ## 📱 Android Integration
 
-Both models are integrated into the **[MedLens](medlens/README.md)** Android app via native runtimes:
+Both models are integrated into the **[MedLens](Medlens/README.md)** Android app via native runtimes:
 
 ### BiomedCLIP — ONNX Runtime Mobile 1.19.0
 
@@ -106,7 +106,7 @@ llama.cpp is compiled from source as a static library via CMake `add_subdirector
 - `use_mmap=false` to avoid page-fault thrashing on the 2.2 GB model
 - 4 threads targeting big cores (1×Cortex-X4 + 3×Cortex-A720)
 
-See [android_app/DEPLOYMENT_TECHNICAL_REPORT.md](android_app/DEPLOYMENT_TECHNICAL_REPORT.md) for the full 0.2 → 7.8 tok/s debugging story.
+See [Inference Test App/DEPLOYMENT_TECHNICAL_REPORT.md](Inference%20Test%20App/DEPLOYMENT_TECHNICAL_REPORT.md) for the full 0.2 → 7.8 tok/s debugging story.
 
 ## ✅ Validation
 

@@ -1,7 +1,7 @@
 # Roadmap — MedGemma Edge Android App
 
 > **Note:** This roadmap was written for the **proof-of-concept** test app (`android_app/`).
-> Many Phase 2 and Phase 4 goals have been **achieved** in the production app — see [`medlens/README.md`](../medlens/README.md).
+> Many Phase 2 and Phase 4 goals have been **achieved** in the production app — see [`Medlens/README.md`](../Medlens/README.md).
 
 > Current status: **Proof-of-concept test app** — superseded by the production MedLens app.
 
@@ -110,4 +110,4 @@ The core use case: **health worker photographs a medical image → BiomedCLIP ex
 
 ---
 
-> **See [`medlens/README.md`](../medlens/README.md) for the production app that builds on this PoC.**
+> **See [`Medlens/README.md`](../Medlens/README.md) for the production app that builds on this PoC.**

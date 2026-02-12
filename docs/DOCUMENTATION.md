@@ -317,7 +317,7 @@ print(result.next_steps)
 - CUDA 11.8+ with cuDNN
 - PyTorch 2.1+
 - Transformers 4.36+
-- See `requirements.txt` for full list
+- See `desktop_pipeline/requirements.txt` for full list
 
 ### Production Deployment
 

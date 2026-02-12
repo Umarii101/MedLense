@@ -326,7 +326,7 @@ print(info)
 **Solutions**:
 ```bash
 # Reinstall requirements
-pip install -r requirements.txt --force-reinstall
+pip install -r desktop_pipeline/requirements.txt --force-reinstall
 
 # Install specific package
 pip install transformers --upgrade
@@ -403,7 +403,8 @@ Before deploying or submitting:
 ## 📝 Example Test Run
 
 ```bash
-# Full test sequence
+# Full test sequence (run from desktop_pipeline/)
+cd desktop_pipeline
 python -c "from utils.memory import check_cuda_setup; print(check_cuda_setup())"
 python -c "from examples.example_data import list_example_cases; list_example_cases()"
 python main.py
@@ -415,10 +416,10 @@ Expected runtime: 5-10 minutes first time (model download), 2-3 minutes subseque
 
 For developers new to medical AI:
 
-1. **Start with**: Run `main.py` and review outputs
-2. **Next**: Examine `clinical_text_pipeline.py` to understand flow
-3. **Then**: Read safety mechanisms in `utils/safety.py`
-4. **Finally**: Customize prompts in `models/medgemma.py`
+1. **Start with**: Run `desktop_pipeline/main.py` and review outputs
+2. **Next**: Examine `desktop_pipeline/pipelines/clinical_text_pipeline.py` to understand flow
+3. **Then**: Read safety mechanisms in `desktop_pipeline/utils/safety.py`
+4. **Finally**: Customize prompts in `desktop_pipeline/models/medgemma.py`
 
 ## 📞 Support
 
@@ -432,4 +433,4 @@ If issues persist:
 
 ---
 
-**Ready to get started?** Run: `python main.py`
+**Ready to get started?** Run: `cd desktop_pipeline && python main.py`

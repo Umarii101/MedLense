@@ -4,7 +4,7 @@
 
 ## Overview
 
-MedLens is the production evolution of the [android_app/](../android_app/) proof-of-concept. It provides a unified **chat interface** where healthcare workers can:
+MedLens is the production evolution of the [Inference Test App/](../Inference%20Test%20App/) proof-of-concept. It provides a unified **chat interface** where healthcare workers can:
 
 1. **Capture** a medical image (camera or gallery)
 2. **Add context** ("Patient has had this rash for 3 days")
@@ -92,7 +92,7 @@ These embeddings were generated offline using `quantization/scripts/generate_exp
 ## Source Files
 
 ```
-medlens/
+Medlens/
 ├── app/src/main/
 │   ├── java/com/medgemma/edge/
 │   │   ├── MainActivity.kt              # Entry point, permission handling, screen routing
@@ -144,12 +144,12 @@ The CMakeLists.txt expects `llama_cpp_repo/` five directories up from `app/src/m
 git clone --depth 1 https://github.com/ggml-org/llama.cpp.git llama_cpp_repo
 ```
 
-This places `llama_cpp_repo/` at the same level as `medlens/`, `android_app/`, etc.
+This places `llama_cpp_repo/` at the same level as `Medlens/`, `Inference Test App/`, etc.
 
 ### Step 2: Build
 
 ```bash
-# Open medlens/ in Android Studio → Build → assembleDebug
+# Open Medlens/ in Android Studio → Build → assembleDebug
 # Or from command line:
 cd medlens
 ./gradlew assembleDebug
@@ -186,7 +186,7 @@ adb install app/build/outputs/apk/debug/app-debug.apk
 |----------|-----------|
 | **llama.cpp static linking** | Single `.so` with all llama/ggml code. No runtime dependency issues. |
 | **`use_mmap=false`** | Sequential RAM load avoids page-fault thrashing (5× faster inference). |
-| **`-O3` on ALL targets** | Gradle's `assembleDebug` defaults to `-O0`. Three-mechanism CMake approach ensures every ggml/llama source file gets `-O3`. See [DEPLOYMENT_TECHNICAL_REPORT.md](../android_app/DEPLOYMENT_TECHNICAL_REPORT.md). |
+| **`-O3` on ALL targets** | Gradle's `assembleDebug` defaults to `-O0`. Three-mechanism CMake approach ensures every ggml/llama source file gets `-O3`. See [DEPLOYMENT_TECHNICAL_REPORT.md](../Inference%20Test%20App/DEPLOYMENT_TECHNICAL_REPORT.md). |
 | **ARM `armv8.2-a+dotprod+i8mm+fp16` globally** | Enables NEON dot-product and int8 matrix-multiply intrinsics for all quantized matmul operations. |
 | **Zero-shot classification via text embeddings** | Avoids shipping a text encoder on device. Pre-compute once offline, classify with cosine similarity at runtime. |
 | **Single ViewModel** | `ChatViewModel` orchestrates all models, manages chat state, and handles streaming — keeps the UI layer thin. |
@@ -194,7 +194,7 @@ adb install app/build/outputs/apk/debug/app-debug.apk
 
 ## Evolution from PoC
 
-The [android_app/](../android_app/) proof-of-concept had a 2-tab layout with raw embeddings display and basic text generation. MedLens evolved this into:
+The [Inference Test App/](../Inference%20Test%20App/) proof-of-concept had a 2-tab layout with raw embeddings display and basic text generation. MedLens evolved this into:
 
 - **Unified chat interface** replacing separate tabs
 - **Combined BiomedCLIP → Classifier → MedGemma pipeline** (PoC had models running independently)
@@ -204,7 +204,7 @@ The [android_app/](../android_app/) proof-of-concept had a 2-tab layout with raw
 - **Proper Gemma 3 chat template** (PoC used raw tokenization)
 - **Context-aware prompting** — classification findings embedded in the LLM prompt
 
-See [android_app/ROADMAP.md](../android_app/ROADMAP.md) for the original planned evolution and what was achieved.
+See [Inference Test App/ROADMAP.md](../Inference%20Test%20App/ROADMAP.md) for the original planned evolution and what was achieved.
 
 ## ⚠️ Medical Disclaimer
 
