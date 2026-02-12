@@ -15,7 +15,7 @@
 | **MedGemma 4B-IT** | 8.6 GB | 2.2 GB | 74% |
 | **BiomedCLIP** | 329 MB | 84 MB | 74% |
 
-**Target**: Android devices — includes **MedLens**, a production MVVM app with 4 screens (Home, Image Analysis, Clinical Assistant, Reports), combined BiomedCLIP + MedGemma pipeline, and medical condition classification.
+**Target**: Android devices — includes **[MedLens](medlens/README.md)**, a production chat-based app with unified camera + gallery interface, combined BiomedCLIP → zero-shot classifier → MedGemma pipeline, streaming clinical assessments, and 30-condition medical classification — all running entirely on-device.
 
 ## 🚀 Quick Start
 
@@ -47,6 +47,18 @@ The Models that I have quantized are too large for Git. Download from Google Dri
 ├── EDGE_DEPLOYMENT.md        # ⭐ Full edge deployment story
 ├── requirements.txt
 │
+├── medlens/                  # ⭐ MedLens — Production Android app
+│   ├── README.md                      # App architecture, build & run instructions
+│   ├── app/src/main/cpp/              # C++ JNI bridge (llama.cpp, static linked)
+│   ├── app/src/main/java/             # Kotlin: ChatViewModel, inference wrappers, UI
+│   ├── app/src/main/assets/           # Pre-computed text embeddings (30 conditions)
+│   └── build.gradle.kts
+│
+├── android_app/              # Android PoC (test app — predecessor to MedLens)
+│   ├── DEPLOYMENT_TECHNICAL_REPORT.md  # ⭐ Build & debugging story (0.2→7.8 tok/s)
+│   ├── ROADMAP.md                      # Optimization roadmap
+│   └── app/src/main/                   # 2-tab test harness
+│
 ├── edge_deployment/          # Quantized models for mobile
 │   ├── models/
 │   │   ├── biomedclip/       # ONNX INT8 (84 MB)
@@ -54,40 +66,26 @@ The Models that I have quantized are too large for Git. Download from Google Dri
 │   └── README.md
 │
 ├── quantization/             # Quantization scripts & methodology
-│   ├── scripts/
-│   ├── results/
+│   ├── scripts/              # ONNX export, INT8, GGUF, embedding generation
 │   └── README.md
 │
-├── benchmarks/               # Performance measurements
+├── benchmarks/               # Performance measurements (desktop + on-device)
 │   └── README.md
-│
-├── android_app/              # Android PoC application (test app)
-│   ├── DEPLOYMENT_TECHNICAL_REPORT.md  # ⭐ Full build & debugging story
-│   ├── ROADMAP.md                      # Future optimization plans
-│   ├── app/src/main/cpp/              # C++ JNI bridge + CMake
-│   ├── app/src/main/java/             # Kotlin inference wrappers + UI
-│   └── build.gradle.kts
-│
-├── medlens/                  # ⭐ MedLens — Production Android app
-│   ├── app/src/main/cpp/              # C++ JNI bridge (llama.cpp)
-│   ├── app/src/main/java/             # Kotlin MVVM (4 screens, 4 ViewModels)
-│   ├── app/src/main/assets/           # Reference embeddings
-│   └── build.gradle.kts
 │
 ├── tests/                    # Validation test suite
 │   ├── test_biomedclip.py
 │   ├── test_medgemma.py
 │   └── run_all_tests.py
 │
-├── models/                   # Desktop model loaders
-├── pipelines/                # Analysis pipelines
-├── schemas/                  # Data models
-├── utils/                    # Utilities
+├── models/                   # Desktop model loaders (MedGemma, BiomedCLIP, risk)
+├── pipelines/                # Desktop analysis pipelines (text, image, multimodal)
+├── schemas/                  # Pydantic output models
+├── utils/                    # Safety checks, memory management
 │
 └── docs/                     # Additional documentation
-    ├── SETUP_GUIDE.md
-    ├── DOCUMENTATION.md
-    └── PROJECT_SUMMARY.md
+    ├── DOCUMENTATION.md      # Technical deep dive
+    ├── SETUP_GUIDE.md        # Development environment setup
+    └── PROJECT_SUMMARY.md    # Executive summary
 ```
 
 ## 📊 Key Results
@@ -120,18 +118,21 @@ ALL TESTS PASSED ✅
 
 | Document | Description |
 |----------|-------------|
-| [EDGE_DEPLOYMENT.md](EDGE_DEPLOYMENT.md) | Full edge deployment story |
-| [android_app/DEPLOYMENT_TECHNICAL_REPORT.md](android_app/DEPLOYMENT_TECHNICAL_REPORT.md) | Android build challenges & solutions |
-| [android_app/ROADMAP.md](android_app/ROADMAP.md) | Future optimization roadmap |
-| [quantization/README.md](quantization/README.md) | Quantization methodology |
-| [benchmarks/README.md](benchmarks/README.md) | Performance measurements |
-| [docs/SETUP_GUIDE.md](docs/SETUP_GUIDE.md) | Development setup |
+| [medlens/README.md](medlens/README.md) | **⭐ MedLens app** — architecture, build instructions, pipeline details |
+| [EDGE_DEPLOYMENT.md](EDGE_DEPLOYMENT.md) | Full edge deployment story — quantization approach & rationale |
+| [android_app/DEPLOYMENT_TECHNICAL_REPORT.md](android_app/DEPLOYMENT_TECHNICAL_REPORT.md) | Android build challenges & solutions (0.2 → 7.8 tok/s debugging) |
+| [android_app/ROADMAP.md](android_app/ROADMAP.md) | Optimization roadmap & future targets |
+| [quantization/README.md](quantization/README.md) | Quantization methodology & scripts |
+| [benchmarks/README.md](benchmarks/README.md) | Performance measurements (desktop + on-device) |
+| [docs/DOCUMENTATION.md](docs/DOCUMENTATION.md) | Technical deep dive — pipelines, safety, output schema |
+| [docs/SETUP_GUIDE.md](docs/SETUP_GUIDE.md) | Development environment setup |
+| [docs/PROJECT_SUMMARY.md](docs/PROJECT_SUMMARY.md) | Executive summary |
 
 ## 🔗 Links
 
 - **Competition**: [Kaggle MedGemma Impact Challenge](https://kaggle.com/competitions/med-gemma-impact-challenge)
 - **HAI-DEF Models**: [Google Health AI Developer Foundations](https://huggingface.co/google/medgemma-4b-it)
-- **Video Demo**: [Coming Soon]
+- **Video Demo**: *See [medlens/README.md](medlens/README.md) for app walkthrough*
 
 
 ## ⚠️ Medical Disclaimer

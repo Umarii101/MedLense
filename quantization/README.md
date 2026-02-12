@@ -4,11 +4,17 @@ This folder contains the scripts used to quantize HAI-DEF models for edge deploy
 
 ## Overview
 
-| Model | Script | Input | Output | Method |
-|-------|--------|-------|--------|--------|
-| BiomedCLIP | `quantize_int8.py` | PyTorch model | ONNX INT8 | Dynamic quantization |
-| BiomedCLIP | `quantize_onnx_int8.py` | ONNX FP32 | ONNX INT8 | ONNX Runtime quantization |
-| MedGemma | `quantize_gguf.py` | GGUF FP16 | GGUF Q4_K_S | llama.cpp quantization |
+| Script | Purpose | Input | Output |
+|--------|---------|-------|--------|
+| `convert_biomedclip_onnx.py` | Export BiomedCLIP vision encoder to ONNX | PyTorch (HuggingFace) | ONNX FP32 |
+| `export_onnx_static.py` | Export with static batch size + L2 norm | PyTorch (HuggingFace) | ONNX FP32 |
+| `quantize_int8.py` | INT8 quantization (TorchScript path) | PyTorch model | ONNX INT8 |
+| `quantize_onnx_int8.py` | INT8 quantization (ONNX Runtime path) | ONNX FP32 | ONNX INT8 |
+| `quantize_gguf.py` | MedGemma FP16 → Q4_K_S | GGUF FP16 | GGUF Q4_K_S |
+| `generate_expanded_embeddings.py` | Pre-compute text embeddings for zero-shot classifier | BiomedCLIP text encoder | JSON (30 labels, 512-dim) |
+| `test_int8_vs_baseline.py` | Validate INT8 vs FP32 accuracy/latency | Both ONNX models | Report |
+| `download_biomedclip.py` | Download BiomedCLIP from HuggingFace | — | Model files |
+| `verify_biomedclip.py` | Pre-flight model verification | Model files | Status report |
 
 ## BiomedCLIP INT8 Quantization
 
@@ -67,7 +73,7 @@ python llama.cpp/convert_hf_to_gguf.py \
 # Step 2: Quantize to Q4_K_S
 ./llama.cpp/llama-quantize \
     medgemma-4b-f16.gguf \
-    medgemma-4b-q4_k_s.gguf \
+    medgemma-4b-q4_k_s-final.gguf \
     Q4_K_S
 ```
 
@@ -116,7 +122,7 @@ edge_deployment/
 │   │   ├── biomedclip_vision_int8.onnx  # Production
 │   │   └── biomedclip_vision.onnx       # Baseline (optional)
 │   └── medgemma/
-│       └── medgemma-4b-q4_k_s.gguf
+│       └── medgemma-4b-q4_k_s-final.gguf
 ```
 
 ## Dependencies
@@ -127,6 +133,6 @@ pip install onnx onnxruntime llama-cpp-python gguf
 
 For llama.cpp quantization, clone and build:
 ```bash
-git clone https://github.com/ggerganov/llama.cpp
+git clone https://github.com/ggml-org/llama.cpp
 cd llama.cpp && make
 ```

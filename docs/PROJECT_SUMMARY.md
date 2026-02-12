@@ -8,7 +8,7 @@ This project delivers a **production-ready, offline-capable healthcare AI backen
 
 ### 1. **Fully Open-Weight Architecture**
 - ✅ MedGemma 4B-IT for clinical reasoning (primary)
-- ✅ CLIP/BiomedCLIP for medical image understanding
+- ✅ BiomedCLIP for medical image understanding
 - ✅ No proprietary APIs or cloud dependencies
 - ✅ Runs entirely on local GPU (RTX 3080)
 
@@ -66,7 +66,7 @@ This project delivers a **production-ready, offline-capable healthcare AI backen
 | Component | Model | Size | Memory | Purpose |
 |-----------|-------|------|--------|---------|
 | Primary LLM | MedGemma 4B-IT | 4B params | ~4GB | Clinical reasoning |
-| Image Encoder | CLIP ViT-L | ~300M | ~2GB | Visual features |
+| Image Encoder | BiomedCLIP ViT-B | ~86M | ~1GB | Visual features |
 | Risk Scorer | Rule-based + sklearn | Minimal | <1MB | Risk stratification |
 
 ### Edge Deployment Models
@@ -100,9 +100,12 @@ This project delivers a **production-ready, offline-capable healthcare AI backen
 
 ```
 Project 1/
+├── medlens/                    # ⭐ Production Android app
+│   ├── app/src/main/java/com/medgemma/edge/
+│   └── README.md              # App architecture & build guide
 ├── models/                     # Desktop model loaders
 │   ├── medgemma.py            # MedGemma 4B inference
-│   ├── image_encoder.py       # CLIP/DINOv2 image features
+│   ├── image_encoder.py       # BiomedCLIP image features
 │   └── risk_model.py          # Risk scoring
 ├── pipelines/                  # End-to-end workflows
 │   ├── clinical_text_pipeline.py
@@ -113,23 +116,29 @@ Project 1/
 ├── utils/                      # Utilities
 │   ├── safety.py              # Safety mechanisms
 │   └── memory.py              # GPU memory management
-├── edge_deployment/            # Mobile/edge models
+├── edge_deployment/            # Mobile/edge models & integration
 │   ├── models/
 │   │   ├── biomedclip/        # ONNX INT8 (84 MB)
 │   │   └── medgemma/          # GGUF Q4_K_S (2.2 GB)
-│   ├── scripts/
 │   └── README.md
+├── quantization/               # Model quantization pipeline
+│   └── scripts/               # 9 conversion & validation scripts
+├── benchmarks/                 # On-device performance measurements
 ├── tests/                      # Validation tests
 │   ├── test_biomedclip.py     # BiomedCLIP INT8 tests
 │   ├── test_medgemma.py       # MedGemma Q4_K_S tests
 │   └── run_all_tests.py       # Full test suite
+├── android_app/                # PoC predecessor (historical)
+├── docs/                       # Detailed documentation
+│   ├── DOCUMENTATION.md       # Technical deep dive
+│   ├── SETUP_GUIDE.md         # Environment setup
+│   └── PROJECT_SUMMARY.md     # This file
 ├── test_images/                # Sample test images
 ├── examples/                   # Example data
 ├── main.py                     # Demo script
 ├── requirements.txt
-├── README.md
-├── DOCUMENTATION.md
-└── SETUP_GUIDE.md
+├── README.md                   # Landing page
+└── EDGE_DEPLOYMENT.md          # Edge AI narrative
 ```
 
 ## 🚀 Quick Start

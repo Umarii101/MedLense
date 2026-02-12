@@ -1,14 +1,15 @@
 /**
- * MedGemma JNI Bridge — MedLens App
+ * MedGemma JNI Bridge
  *
- * JNI wrapper around llama.cpp for running MedGemma GGUF models on Android.
- * Provides: init, load, generate (streaming), benchmark, systemInfo, unload.
+ * Minimal JNI wrapper around llama.cpp for running MedGemma GGUF models
+ * on Android. Provides: init, load, generate (streaming), benchmark,
+ * systemInfo, unload.
  *
  * Streaming: nativeGenerate writes tokens into a shared buffer.
  *   Kotlin polls nativeGetPartialResult() every ~200ms.
  *   nativeStopGeneration() sets a flag to abort early.
  *
- * JNI class: com.medlens.app.inference.MedGemmaInference
+ * JNI class: com.medgemma.edge.inference.MedGemmaInference
  */
 
 #include <android/log.h>
@@ -39,11 +40,11 @@ static llama_context * g_context = nullptr;
 
 // ── Streaming state ─────────────────────────────────────────────────────────
 static std::mutex       g_result_mutex;
-static std::string      g_partial_result;
-static std::atomic<bool> g_stop_flag{false};
-static std::atomic<int>  g_tokens_generated{0};
-static std::atomic<bool> g_is_generating{false};
-static std::atomic<float> g_tok_per_sec{0.0f};
+static std::string      g_partial_result;       // accumulates generated text
+static std::atomic<bool> g_stop_flag{false};     // set true to abort generation
+static std::atomic<int>  g_tokens_generated{0};  // token counter
+static std::atomic<bool> g_is_generating{false};  // true while generate() runs
+static std::atomic<float> g_tok_per_sec{0.0f};   // real-time speed
 
 static void log_callback(ggml_log_level level, const char * text, void *) {
     int prio = ANDROID_LOG_DEBUG;
@@ -57,16 +58,21 @@ static void log_callback(ggml_log_level level, const char * text, void *) {
 }
 
 // ---------------------------------------------------------------------------
-// JNI exports — class: com.medlens.app.inference.MedGemmaInference
+// JNI exports
 // ---------------------------------------------------------------------------
 extern "C" {
 
+/**
+ * Initialize llama.cpp backend.
+ * Must be called once before any other native method.
+ */
 JNIEXPORT void JNICALL
-Java_com_medlens_app_inference_MedGemmaInference_nativeInit(
+Java_com_medgemma_edge_inference_MedGemmaInference_nativeInit(
         JNIEnv * env, jobject, jstring jNativeLibDir) {
 
     llama_log_set(log_callback, nullptr);
 
+    // Try loading dynamic backends from app's native lib directory
     const char * libdir = env->GetStringUTFChars(jNativeLibDir, nullptr);
     LOGi("Init: native lib dir = %s", libdir);
     ggml_backend_load_all_from_path(libdir);
@@ -76,19 +82,35 @@ Java_com_medlens_app_inference_MedGemmaInference_nativeInit(
     LOGi("Backend initialized");
 }
 
+/**
+ * Load a GGUF model from the given file path.
+ * Uses mmap + mlock to map the model AND pin it in physical RAM.
+ * Creates a context with 1024 token window.
+ * Returns 0 on success, non-zero on failure.
+ */
 JNIEXPORT jint JNICALL
-Java_com_medlens_app_inference_MedGemmaInference_nativeLoadModel(
+Java_com_medgemma_edge_inference_MedGemmaInference_nativeLoadModel(
         JNIEnv * env, jobject, jstring jModelPath) {
 
+    // Unload previous model if any
     if (g_context) { llama_free(g_context); g_context = nullptr; }
     if (g_model)   { llama_model_free(g_model); g_model = nullptr; }
 
     const char * path = env->GetStringUTFChars(jModelPath, nullptr);
     LOGi("Loading model: %s", path);
+
+    // Log system info BEFORE model load
     LOGi("System info: %s", llama_print_system_info());
+    LOGi("mmap supported: %d, mlock supported: %d",
+         llama_supports_mmap(), llama_supports_mlock());
 
     llama_model_params model_params = llama_model_default_params();
-    model_params.use_mmap  = false;   // force sequential RAM load (avoids page-fault thrashing)
+    // mmap=false forces a sequential read into malloc'd RAM.
+    // On Android, mlock requires CAP_IPC_LOCK (RLIMIT_MEMLOCK=64KB for apps),
+    // so mmap+mlock silently degrades to demand-paging from flash at ~0.7 GB/s.
+    // With mmap=false, the full 2.3 GB is read upfront (~25-30s) but then all
+    // weights are in anonymous pages that the kernel won't page out to flash.
+    model_params.use_mmap  = false;
     model_params.use_mlock = false;
     LOGi("Loading with mmap=false (full RAM load)...");
 
@@ -105,12 +127,15 @@ Java_com_medlens_app_inference_MedGemmaInference_nativeLoadModel(
     }
     LOGi("Model loaded into RAM in %.1f seconds", load_s);
 
+    // Create inference context — try different thread counts
     llama_context_params ctx_params = llama_context_default_params();
-    ctx_params.n_ctx             = 512;
+    ctx_params.n_ctx             = 512;   // minimal context for demo
     ctx_params.n_batch           = 512;
     ctx_params.n_threads         = 4;
     ctx_params.n_threads_batch   = 4;
-    ctx_params.flash_attn_type   = LLAMA_FLASH_ATTN_TYPE_DISABLED;
+    ctx_params.flash_attn_type   = LLAMA_FLASH_ATTN_TYPE_DISABLED;  // safer fallback
+
+    LOGi("Creating context: n_ctx=512, threads=4, flash_attn=disabled");
 
     g_context = llama_init_from_model(g_model, ctx_params);
     if (!g_context) {
@@ -124,14 +149,21 @@ Java_com_medlens_app_inference_MedGemmaInference_nativeLoadModel(
     return 0;
 }
 
+/**
+ * Generate text given a prompt string.
+ * Writes tokens into g_partial_result as they are generated.
+ * Kotlin should poll nativeGetPartialResult() for streaming updates.
+ * Returns the final generated text (not including the prompt).
+ */
 JNIEXPORT jstring JNICALL
-Java_com_medlens_app_inference_MedGemmaInference_nativeGenerate(
+Java_com_medgemma_edge_inference_MedGemmaInference_nativeGenerate(
         JNIEnv * env, jobject, jstring jPrompt, jint maxTokens) {
 
     if (!g_model || !g_context) {
         return env->NewStringUTF("[Error: model not loaded]");
     }
 
+    // Reset streaming state
     {
         std::lock_guard<std::mutex> lock(g_result_mutex);
         g_partial_result.clear();
@@ -145,7 +177,8 @@ Java_com_medlens_app_inference_MedGemmaInference_nativeGenerate(
     std::string prompt(prompt_cstr);
     env->ReleaseStringUTFChars(jPrompt, prompt_cstr);
 
-    std::vector<llama_token> tokens = common_tokenize(g_context, prompt, true);
+    // Tokenize (parse_special=true so <start_of_turn>, <end_of_turn> are recognized)
+    std::vector<llama_token> tokens = common_tokenize(g_context, prompt, true, true);
     LOGi("Prompt tokens: %zu", tokens.size());
 
     if (tokens.empty()) {
@@ -153,9 +186,13 @@ Java_com_medlens_app_inference_MedGemmaInference_nativeGenerate(
         return env->NewStringUTF("[Error: empty prompt after tokenization]");
     }
 
+    // Clear KV cache
     llama_memory_clear(llama_get_memory(g_context), false);
 
+    // Evaluate prompt
     const int n_prompt = (int) tokens.size();
+    LOGi("Evaluating %d prompt tokens...", n_prompt);
+
     auto t_prompt_start = std::chrono::high_resolution_clock::now();
 
     llama_batch batch = llama_batch_init(std::max(n_prompt, 512), 0, 1);
@@ -176,10 +213,12 @@ Java_com_medlens_app_inference_MedGemmaInference_nativeGenerate(
     double pp_speed = (prompt_ms > 0) ? (n_prompt / (prompt_ms / 1000.0)) : 0;
     LOGi("Prompt eval: %.0f ms (%.1f tok/s)", prompt_ms, pp_speed);
 
+    // Setup sampler (low temperature for medical responses)
     common_params_sampling sparams;
     sparams.temp = 0.3f;
     common_sampler * sampler = common_sampler_init(g_model, sparams);
 
+    // Generate tokens (streaming into g_partial_result)
     const llama_vocab * vocab = llama_model_get_vocab(g_model);
     int pos = n_prompt;
     int n_gen = 0;
@@ -187,6 +226,7 @@ Java_com_medlens_app_inference_MedGemmaInference_nativeGenerate(
     auto t_gen_start = std::chrono::high_resolution_clock::now();
 
     for (int i = 0; i < maxTokens; i++) {
+        // Check stop flag
         if (g_stop_flag.load()) {
             LOGi("Generation stopped by user after %d tokens", n_gen);
             break;
@@ -203,12 +243,14 @@ Java_com_medlens_app_inference_MedGemmaInference_nativeGenerate(
         std::string piece = common_token_to_piece(g_context, new_token);
         n_gen++;
 
+        // Update streaming state
         {
             std::lock_guard<std::mutex> lock(g_result_mutex);
             g_partial_result += piece;
         }
         g_tokens_generated.store(n_gen);
 
+        // Update speed every 4 tokens
         if (n_gen % 4 == 0) {
             auto now = std::chrono::high_resolution_clock::now();
             double elapsed = std::chrono::duration<double>(now - t_gen_start).count();
@@ -217,6 +259,7 @@ Java_com_medlens_app_inference_MedGemmaInference_nativeGenerate(
             }
         }
 
+        // Log every 16 tokens
         if (n_gen % 16 == 0) {
             auto now = std::chrono::high_resolution_clock::now();
             double elapsed = std::chrono::duration<double>(now - t_gen_start).count();
@@ -224,6 +267,7 @@ Java_com_medlens_app_inference_MedGemmaInference_nativeGenerate(
             LOGi("Generated %d/%d tokens (%.1f tok/s)", n_gen, (int)maxTokens, speed);
         }
 
+        // Decode the new token
         common_batch_clear(batch);
         common_batch_add(batch, new_token, pos++, {0}, true);
         if (llama_decode(g_context, batch) != 0) {
@@ -237,11 +281,15 @@ Java_com_medlens_app_inference_MedGemmaInference_nativeGenerate(
     double tg_speed = (gen_ms > 0) ? (n_gen / (gen_ms / 1000.0)) : 0;
 
     LOGi("Generation done: %d tokens in %.0f ms (%.2f tok/s)", n_gen, gen_ms, tg_speed);
+    LOGi("Prompt: %.0f ms (%.1f tok/s), Generation: %.0f ms (%.1f tok/s)",
+         prompt_ms, pp_speed, gen_ms, tg_speed);
 
     common_sampler_free(sampler);
     llama_batch_free(batch);
+
     g_is_generating.store(false);
 
+    // Build final result with stats header
     std::string final_result;
     {
         std::lock_guard<std::mutex> lock(g_result_mutex);
@@ -257,8 +305,12 @@ Java_com_medlens_app_inference_MedGemmaInference_nativeGenerate(
     return env->NewStringUTF(output.c_str());
 }
 
+/**
+ * Get the current partial generation result (for streaming UI updates).
+ * Returns: "TOKENS|SPEED|IS_GENERATING|TEXT"
+ */
 JNIEXPORT jstring JNICALL
-Java_com_medlens_app_inference_MedGemmaInference_nativeGetPartialResult(
+Java_com_medgemma_edge_inference_MedGemmaInference_nativeGetPartialResult(
         JNIEnv * env, jobject) {
     std::string text;
     {
@@ -269,27 +321,36 @@ Java_com_medlens_app_inference_MedGemmaInference_nativeGetPartialResult(
     float speed = g_tok_per_sec.load();
     bool generating = g_is_generating.load();
 
+    // Format: tokens|speed|is_generating|text
     char header[128];
     snprintf(header, sizeof(header), "%d|%.1f|%d|", tokens, speed, generating ? 1 : 0);
     std::string result = std::string(header) + text;
     return env->NewStringUTF(result.c_str());
 }
 
+/**
+ * Signal the generation loop to stop.
+ */
 JNIEXPORT void JNICALL
-Java_com_medlens_app_inference_MedGemmaInference_nativeStopGeneration(
+Java_com_medgemma_edge_inference_MedGemmaInference_nativeStopGeneration(
         JNIEnv *, jobject) {
     LOGi("Stop requested");
     g_stop_flag.store(true);
 }
 
+/**
+ * Run prompt-processing and token-generation benchmarks.
+ * Returns formatted results string.
+ */
 JNIEXPORT jstring JNICALL
-Java_com_medlens_app_inference_MedGemmaInference_nativeBench(
+Java_com_medgemma_edge_inference_MedGemmaInference_nativeBench(
         JNIEnv * env, jobject, jint pp, jint tg, jint reps) {
 
     if (!g_model) {
         return env->NewStringUTF("Error: model not loaded");
     }
 
+    // Create a dedicated context for benchmarking
     llama_context_params ctx_params = llama_context_default_params();
     ctx_params.n_ctx             = pp + tg + 64;
     ctx_params.n_batch           = std::max((int)pp, 512);
@@ -306,6 +367,7 @@ Java_com_medlens_app_inference_MedGemmaInference_nativeBench(
     double pp_sum = 0.0, tg_sum = 0.0;
 
     for (int r = 0; r < reps; r++) {
+        // ── Prompt processing benchmark ──
         common_batch_clear(batch);
         for (int i = 0; i < pp; i++) {
             common_batch_add(batch, 0, i, {0}, false);
@@ -314,22 +376,34 @@ Java_com_medlens_app_inference_MedGemmaInference_nativeBench(
         llama_memory_clear(llama_get_memory(bench_ctx), false);
 
         const int64_t t_pp_start = ggml_time_us();
-        if (llama_decode(bench_ctx, batch) != 0) break;
+        if (llama_decode(bench_ctx, batch) != 0) {
+            LOGe("llama_decode failed during pp bench");
+            break;
+        }
         const int64_t t_pp_end = ggml_time_us();
 
+        // ── Token generation benchmark ──
         llama_memory_clear(llama_get_memory(bench_ctx), false);
         const int64_t t_tg_start = ggml_time_us();
         for (int i = 0; i < tg; i++) {
             common_batch_clear(batch);
             common_batch_add(batch, 0, i, {0}, true);
-            if (llama_decode(bench_ctx, batch) != 0) break;
+            if (llama_decode(bench_ctx, batch) != 0) {
+                LOGe("llama_decode failed during tg bench at token %d", i);
+                break;
+            }
         }
         const int64_t t_tg_end = ggml_time_us();
 
         const double t_pp = (t_pp_end - t_pp_start) / 1000000.0;
         const double t_tg = (t_tg_end - t_tg_start) / 1000000.0;
-        pp_sum += (t_pp > 0) ? pp / t_pp : 0;
-        tg_sum += (t_tg > 0) ? tg / t_tg : 0;
+
+        const double pp_speed = (t_pp > 0) ? pp / t_pp : 0;
+        const double tg_speed = (t_tg > 0) ? tg / t_tg : 0;
+
+        pp_sum += pp_speed;
+        tg_sum += tg_speed;
+        LOGi("Rep %d/%d: pp=%.2f tok/s, tg=%.2f tok/s", r+1, reps, pp_speed, tg_speed);
     }
 
     llama_batch_free(batch);
@@ -340,27 +414,45 @@ Java_com_medlens_app_inference_MedGemmaInference_nativeBench(
 
     char buf[1024];
     snprintf(buf, sizeof(buf),
-        "=== MedLens Benchmark ===\n"
+        "=== MEDGEMMA BENCHMARK ===\n"
         "Prompt Processing: %.2f tok/s (%d tokens)\n"
         "Token Generation:  %.2f tok/s (%d tokens)\n"
-        "Repetitions: %d\n\nSystem: %s",
-        pp_sum, (int)pp, tg_sum, (int)tg, (int)reps,
+        "Repetitions: %d\n"
+        "\n"
+        "Device: %s\n"
+        "System: %s",
+        pp_sum, (int)pp,
+        tg_sum, (int)tg,
+        (int)reps,
+        llama_print_system_info(),
         llama_print_system_info());
 
     return env->NewStringUTF(buf);
 }
 
+/**
+ * Return llama.cpp system info string (CPU features, etc.)
+ */
 JNIEXPORT jstring JNICALL
-Java_com_medlens_app_inference_MedGemmaInference_nativeSystemInfo(
+Java_com_medgemma_edge_inference_MedGemmaInference_nativeSystemInfo(
         JNIEnv * env, jobject) {
     return env->NewStringUTF(llama_print_system_info());
 }
 
+/**
+ * Unload the current model and free resources.
+ */
 JNIEXPORT void JNICALL
-Java_com_medlens_app_inference_MedGemmaInference_nativeUnload(
+Java_com_medgemma_edge_inference_MedGemmaInference_nativeUnload(
         JNIEnv *, jobject) {
-    if (g_context) { llama_free(g_context); g_context = nullptr; }
-    if (g_model)   { llama_model_free(g_model); g_model = nullptr; }
+    if (g_context) {
+        llama_free(g_context);
+        g_context = nullptr;
+    }
+    if (g_model) {
+        llama_model_free(g_model);
+        g_model = nullptr;
+    }
     LOGi("Model unloaded");
 }
 

@@ -115,23 +115,23 @@ pip install bitsandbytes sentencepiece
 
 #### Step 3: Download Models (First Run)
 
-Models will auto-download on first use. Expect ~15-20GB total:
+Models will auto-download on first use. Expect ~10-12 GB total:
 
-- MedGemma 7B: ~13GB
-- CLIP ViT-Large: ~1.7GB
-- DINOv2: ~300MB
+- MedGemma 4B-IT: ~8.6 GB
+- BiomedCLIP: ~329 MB
+- CLIP ViT-Large (fallback): ~1.7 GB
 
 **Pre-download (optional)**:
 ```python
 from transformers import AutoModel, AutoTokenizer
 
-# Pre-download MedGemma
-tokenizer = AutoTokenizer.from_pretrained("google/medgemma-7b")
-model = AutoModelForCausalLM.from_pretrained("google/medgemma-7b")
+# Pre-download MedGemma 4B-IT (requires HF access token for gated model)
+tokenizer = AutoTokenizer.from_pretrained("google/medgemma-4b-it")
+model = AutoModelForCausalLM.from_pretrained("google/medgemma-4b-it")
 
-# Pre-download CLIP
-from transformers import CLIPModel
-clip = CLIPModel.from_pretrained("openai/clip-vit-large-patch14")
+# Pre-download BiomedCLIP
+from open_clip import create_model_from_pretrained
+model, preprocess = create_model_from_pretrained("hf-hub:microsoft/BiomedCLIP-PubMedBERT_256-vit_base_patch16_224")
 ```
 
 ## 🧪 Testing

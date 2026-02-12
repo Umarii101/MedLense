@@ -124,7 +124,7 @@ def main():
         print(f"  Cosine Similarity: {cos_sim:.6f}")
         print(f"  Max Difference: {max_diff:.6f}")
         print(f"  Speedup: {time_fp32/time_int8:.2f}x")
-    
+        print(f"  Output fp32: min {output_fp32.min():.4f}, max {output_fp32.max():.4f}")
     # Summary
     print("\n" + "=" * 60)
     print("TEST RESULTS")

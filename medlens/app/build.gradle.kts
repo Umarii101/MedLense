@@ -4,13 +4,13 @@ plugins {
 }
 
 android {
-    namespace = "com.medlens.app"
+    namespace = "com.medgemma.edge"
     compileSdk {
         version = release(36)
     }
 
     defaultConfig {
-        applicationId = "com.medlens.app"
+        applicationId = "com.medgemma.edge"
         minSdk = 26
         targetSdk = 36
         versionCode = 1
@@ -26,17 +26,13 @@ android {
         // CMake arguments for llama.cpp native build
         externalNativeBuild {
             cmake {
-                arguments += "-DLLAMA_CPP_DIR=${rootDir.parentFile.parentFile}/Edge_Deployment/llama_cpp_repo"
+                arguments += "-DLLAMA_CPP_DIR=${rootDir.parentFile}/llama_cpp_repo"
                 cppFlags += "-std=c++17"
             }
         }
     }
 
     buildTypes {
-        debug {
-            // Allow sideloading debug APK without adb -t flag
-            isDebuggable = true
-        }
         release {
             isMinifyEnabled = false
             proguardFiles(
@@ -44,18 +40,6 @@ android {
                 "proguard-rules.pro"
             )
         }
-    }
-
-    // Disable testOnly flag so APK can be installed via file manager
-    packaging {
-        jniLibs {
-            useLegacyPackaging = true
-        }
-    }
-
-    @Suppress("UnstableApiUsage")
-    testOptions {
-        execution = "ANDROIDX_TEST_ORCHESTRATOR"
     }
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
@@ -76,24 +60,40 @@ android {
 dependencies {
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
-    implementation(libs.androidx.lifecycle.viewmodel.compose)
     implementation(libs.androidx.activity.compose)
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.compose.ui)
     implementation(libs.androidx.compose.ui.graphics)
     implementation(libs.androidx.compose.ui.tooling.preview)
     implementation(libs.androidx.compose.material3)
-    implementation(libs.androidx.compose.material.icons.extended)
-    implementation(libs.androidx.navigation.compose)
+
+    // Material Icons Extended (CameraAlt, Stop, Image, etc.)
+    implementation("androidx.compose.material:material-icons-extended")
 
     // ONNX Runtime for BiomedCLIP inference
-    implementation(libs.onnxruntime.android)
+    implementation("com.microsoft.onnxruntime:onnxruntime-android:1.19.0")
 
     // Coroutines for async inference
-    implementation(libs.kotlinx.coroutines.android)
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")
 
     // Image loading
-    implementation(libs.coil.compose)
+    implementation("io.coil-kt:coil-compose:2.5.0")
+
+    // CameraX for live camera capture
+    val cameraxVersion = "1.3.4"
+    implementation("androidx.camera:camera-core:$cameraxVersion")
+    implementation("androidx.camera:camera-camera2:$cameraxVersion")
+    implementation("androidx.camera:camera-lifecycle:$cameraxVersion")
+    implementation("androidx.camera:camera-view:$cameraxVersion")
+
+    // ViewModel Compose integration
+    implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.8.7")
+
+    // Navigation Compose
+    implementation("androidx.navigation:navigation-compose:2.8.5")
+
+    // JSON parsing for embeddings
+    implementation("com.google.code.gson:gson:2.11.0")
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)

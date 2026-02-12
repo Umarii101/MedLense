@@ -48,24 +48,24 @@ python tests/run_all_tests.py
 - **Input**: 224x224 RGB image (NCHW format)
 - **Output**: 512-dim embedding vector
 - **Accuracy**: 99.95% cosine similarity vs FP32
-- **Inference**: ~100ms CPU, ~30-50ms with NNAPI
+- **Inference**: ~126 ms on-device CPU (Snapdragon 8s Gen 3)
 
 ### MedGemma 4B (Q4_K_S)
 - **Source**: google/medgemma-4b-it
 - **Quantization**: Q4_K_S (4-bit k-quant small)
 - **Original Size**: 8.6 GB → 2.2 GB (74% reduction)
-- **Context**: 2048 tokens
-- **Speed**: 9+ tok/s CPU, 15-30+ tok/s on mobile NPU
+- **Context**: 512 tokens (configurable up to 2048)
+- **Speed**: 7.8 tok/s generation, 32.8 tok/s prompt processing (CPU, Snapdragon 8s Gen 3)
 
 ## Android Integration
 
 ### BiomedCLIP with ONNX Runtime
 ```gradle
-implementation 'com.microsoft.onnxruntime:onnxruntime-android:1.16.0'
+implementation 'com.microsoft.onnxruntime:onnxruntime-android:1.19.0'
 ```
 
 ### MedGemma with llama.cpp
-Use [llama.cpp Android bindings](https://github.com/ggerganov/llama.cpp) or MLC-LLM.
+Compiled from source as a static library via CMake `add_subdirectory()` with a C++ JNI bridge. See [medlens/README.md](../medlens/README.md) for build instructions and [android_app/DEPLOYMENT_TECHNICAL_REPORT.md](../android_app/DEPLOYMENT_TECHNICAL_REPORT.md) for the optimization story.
 
 ## File Structure
 
@@ -83,11 +83,20 @@ edge_deployment/
 ## Hardware Requirements
 
 **Target Device**: Realme GT Neo 6 (Snapdragon 8s Gen 3)
-- CPU: 4x Cortex-A720 + 4x Cortex-A520
+- CPU: 1×Cortex-X4 (3.0 GHz) + 4×Cortex-A720 (2.8 GHz) + 3×Cortex-A520 (2.0 GHz)
 - GPU: Adreno 735
 - NPU: Hexagon NPU
-- RAM: 8-12 GB
+- RAM: 12 GB LPDDR5X
 
-**Expected Performance**:
-- BiomedCLIP: 30-50ms inference (NNAPI)
-- MedGemma: 15-30 tok/s (NPU-accelerated)
+**Measured On-Device Performance**:
+
+| Model | Metric | Value |
+|-------|--------|-------|
+| BiomedCLIP INT8 | Inference | ~126 ms (CPU) |
+| MedGemma Q4_K_S | Prompt processing | 32.8 tok/s (CPU) |
+| MedGemma Q4_K_S | Token generation | 7.8 tok/s (CPU) |
+| MedGemma Q4_K_S | Model load | 5–9 seconds |
+
+**Future Targets** (GPU/NPU acceleration not yet implemented):
+- BiomedCLIP: ~30–50 ms with NNAPI
+- MedGemma: 15–30 tok/s with Vulkan/OpenCL GPU offload

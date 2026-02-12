@@ -48,8 +48,7 @@ endif()
 
 # ── Locate llama.cpp source ──────────────────────────────────────────────────
 if(NOT DEFINED LLAMA_CPP_DIR)
-    # Fallback: navigate from medlens/app/src/main/cpp/ up to project root
-    set(LLAMA_CPP_DIR "${CMAKE_CURRENT_LIST_DIR}/../../../../../../Edge_Deployment/llama_cpp_repo")
+    set(LLAMA_CPP_DIR "${CMAKE_CURRENT_LIST_DIR}/../../../../../llama_cpp_repo")
 endif()
 get_filename_component(LLAMA_CPP_DIR "${LLAMA_CPP_DIR}" ABSOLUTE)
 message(STATUS "llama.cpp directory: ${LLAMA_CPP_DIR}")

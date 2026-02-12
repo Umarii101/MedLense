@@ -39,22 +39,33 @@ Performance measurements for quantized edge deployment models.
 
 | Component | Specification |
 |-----------|---------------|
-| CPU | 4x Cortex-A720 @ 3.0GHz + 4x Cortex-A520 @ 2.0GHz |
+| CPU | 1×Cortex-X4 @ 3.0 GHz + 4×Cortex-A720 @ 2.8 GHz + 3×Cortex-A520 @ 2.0 GHz |
 | GPU | Adreno 735 |
 | NPU | Hexagon NPU |
 | RAM | 12 GB LPDDR5X |
 | Storage | UFS 4.0 |
 
-### Expected Mobile Performance
+### Measured On-Device Performance
 
-Based on similar Snapdragon 8 Gen series devices:
+All measurements taken on the actual target device (CPU only — GPU/NPU offload not yet implemented):
 
-| Model | Expected Performance | Notes |
-|-------|---------------------|-------|
-| BiomedCLIP INT8 | 30-50ms | With NNAPI acceleration |
-| BiomedCLIP INT8 | 80-100ms | CPU only fallback |
-| MedGemma Q4_K_S | 15-30 tok/s | With NPU offload |
-| MedGemma Q4_K_S | 8-12 tok/s | CPU only |
+| Model | Metric | Value |
+|-------|--------|-------|
+| BiomedCLIP INT8 | Model load | ~215 ms |
+| BiomedCLIP INT8 | Inference | **~126 ms** (10-run average) |
+| BiomedCLIP INT8 | Embedding dim | 512 |
+| MedGemma Q4_K_S | Model load | 5–9 seconds |
+| MedGemma Q4_K_S | Prompt processing | **32.8 tok/s** |
+| MedGemma Q4_K_S | Token generation | **7.8 tok/s** |
+| MedGemma Q4_K_S | Context window | 512 tokens |
+| MedGemma Q4_K_S | Threads | 4 (big cores) |
+
+### Future Targets (with hardware acceleration)
+
+| Model | Target | Acceleration |
+|-------|--------|--------------|
+| BiomedCLIP INT8 | 30–50 ms | NNAPI (Hexagon NPU) |
+| MedGemma Q4_K_S | 15–30 tok/s | Vulkan/OpenCL (Adreno 735 GPU) |
 
 ### Memory Budget
 
@@ -68,19 +79,19 @@ Based on similar Snapdragon 8 Gen series devices:
 
 *Fits comfortably in 12GB device RAM*
 
-## Latency Breakdown (Estimated)
+## Latency Breakdown (Measured)
 
-**End-to-end clinical analysis with image:**
+**End-to-end clinical analysis with image (MedLens app):**
 
 | Step | Time |
 |------|------|
-| Image capture & preprocessing | 50ms |
-| BiomedCLIP inference | 50ms |
-| Embedding formatting | 10ms |
-| MedGemma prompt construction | 5ms |
-| MedGemma inference (150 tokens) | 5-10s |
-| Output parsing & display | 50ms |
-| **Total** | **~6-11 seconds** |
+| Image capture & preprocessing | ~50 ms |
+| BiomedCLIP inference | ~126 ms |
+| Zero-shot classification (cosine sim) | <1 ms |
+| MedGemma prompt construction | ~5 ms |
+| MedGemma inference (~150 tokens) | ~19 s |
+| **Total (image → complete response)** | **~20–25 seconds** |
+| **Time to first token** | **~6–8 seconds** |
 
 ## Validation Commands
 
@@ -97,10 +108,11 @@ python tests/test_medgemma.py
 
 ## Notes
 
-1. **CPU vs GPU/NPU**: Desktop benchmarks use CPU for fair comparison with mobile
-2. **Context length**: Limited to 2048 tokens for mobile RAM constraints
+1. **CPU only**: All on-device benchmarks are CPU-only. GPU (Vulkan) and NPU (NNAPI) offload are future work.
+2. **Context length**: Set to 512 tokens on device to conserve KV cache memory. Configurable up to 2048.
 3. **Batch size**: Single image/query (typical mobile use case)
 4. **Warm-up**: All benchmarks exclude first inference (model loading)
+5. **Debug vs Release**: Android builds use `assembleDebug` but CMake is forced to `-O3` via custom flags. See [DEPLOYMENT_TECHNICAL_REPORT.md](../android_app/DEPLOYMENT_TECHNICAL_REPORT.md).
 
 ---
 

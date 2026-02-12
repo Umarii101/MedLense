@@ -91,26 +91,22 @@ Key decisions:
 
 ## 📱 Android Integration
 
-### BiomedCLIP with ONNX Runtime Mobile
+Both models are integrated into the **[MedLens](medlens/README.md)** Android app via native runtimes:
 
-```kotlin
-// Load quantized model
-val session = OrtEnvironment.getEnvironment()
-    .createSession(assets.open("biomedclip_vision_int8.onnx"))
+### BiomedCLIP — ONNX Runtime Mobile 1.19.0
 
-// Enable NNAPI for hardware acceleration
-val options = OrtSession.SessionOptions()
-options.addNnapi()
-```
+The Kotlin wrapper (`BiomedClipInference.kt`) loads the INT8 ONNX model, preprocesses images (224×224, ImageNet normalization, NCHW layout), and returns a 512-dim float embedding. ONNX Runtime is included as a Gradle AAR dependency.
 
-### MedGemma with llama.cpp
+### MedGemma — llama.cpp via JNI
 
-```kotlin
-// Using llama.cpp Android bindings
-val model = LlamaModel.load("medgemma-4b-q4_k_s.gguf")
-model.setContextSize(2048)
-model.setThreads(4)  // Optimize for device
-```
+llama.cpp is compiled from source as a static library via CMake `add_subdirectory()`. A C++ JNI bridge (`medgemma_jni.cpp`) exposes model loading, streaming text generation, partial result polling, and stop control to Kotlin. Key optimizations:
+
+- `-O3` forced on all 188+ compile targets (overriding Gradle's Debug `-O0`)
+- ARM `armv8.2-a+dotprod+i8mm+fp16` applied globally for quantized matmul intrinsics
+- `use_mmap=false` to avoid page-fault thrashing on the 2.2 GB model
+- 4 threads targeting big cores (1×Cortex-X4 + 3×Cortex-A720)
+
+See [android_app/DEPLOYMENT_TECHNICAL_REPORT.md](android_app/DEPLOYMENT_TECHNICAL_REPORT.md) for the full 0.2 → 7.8 tok/s debugging story.
 
 ## ✅ Validation
 
@@ -155,21 +151,24 @@ edge_deployment/
 │   │   ├── biomedclip_vision_int8.onnx  # 84 MB (production)
 │   │   └── biomedclip_vision.onnx       # 329 MB (baseline)
 │   └── medgemma/
-│       └── medgemma-4b-q4_k_s.gguf      # 2.2 GB
-├── scripts/
+│       └── medgemma-4b-q4_k_s-final.gguf  # 2.2 GB
 └── README.md
 
 quantization/
 ├── scripts/
-│   ├── quantize_int8.py        # BiomedCLIP INT8
-│   ├── quantize_onnx_int8.py   # ONNX quantization
-│   └── quantize_gguf.py        # MedGemma GGUF
-├── results/
+│   ├── convert_biomedclip_onnx.py  # ONNX export of vision encoder
+│   ├── export_onnx_static.py       # Static batch ONNX export
+│   ├── quantize_int8.py            # BiomedCLIP INT8 (TorchScript)
+│   ├── quantize_onnx_int8.py       # BiomedCLIP INT8 (ONNX Runtime)
+│   ├── quantize_gguf.py            # MedGemma GGUF quantization
+│   ├── generate_expanded_embeddings.py  # Text embeddings for classifier
+│   ├── test_int8_vs_baseline.py    # INT8 vs FP32 validation
+│   ├── download_biomedclip.py      # Model download utility
+│   └── verify_biomedclip.py        # Pre-flight model check
 └── README.md
 
 benchmarks/
-├── desktop_benchmarks.md
-└── device_benchmarks.md        # On-device measurements
+└── README.md          # Desktop + on-device measurements
 
 tests/
 ├── test_biomedclip.py
