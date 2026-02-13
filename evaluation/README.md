@@ -2,9 +2,10 @@
 
 Quantitative evaluation of both edge-deployed models: **BiomedCLIP INT8** (zero-shot image classification) and **MedGemma Q4_K_S** (clinical text generation). These evaluations demonstrate that aggressive quantization preserves clinical utility.
 
-## BiomedCLIP Zero-Shot Classification
+## BiomedCLIP Zero-Shot Classification (400 Images)
 
-**Script**: [`biomedclip_classification_eval.py`](biomedclip_classification_eval.py)
+**Script**: [`biomedclip_dataset_eval.py`](biomedclip_dataset_eval.py)  
+**Dataset**: [COVID-19 Radiography Database](https://www.kaggle.com/datasets/tawsifurrahman/covid19-radiography-database) (100 images per class, 400 total)
 
 ### Methodology
 
@@ -12,50 +13,51 @@ Quantitative evaluation of both edge-deployed models: **BiomedCLIP INT8** (zero-
 2. Load 30 pre-computed text embeddings (same `text_embeddings.json` used in MedLens)
 3. Preprocess images with CLIP normalization (mean=[0.481, 0.458, 0.408], std=[0.269, 0.261, 0.276])
 4. Classify via cosine similarity between image embeddings and text embeddings
-5. Compare INT8 vs FP32 embeddings for quantization fidelity
+5. Evaluate across 4 classes: COVID-19, Normal, Lung Opacity, Viral Pneumonia
 
-### Test Dataset
+### Dataset
 
-5 labeled chest X-rays across 3 conditions (sourced from open medical datasets):
+400 labeled chest X-rays sampled from the COVID-19 Radiography Database (21,000+ images):
 
-| Image | True Condition | View |
-|-------|---------------|------|
-| covid-19-pneumonia-paediatric.jpg | COVID-19 | Frontal |
-| Frontal.jpg | Normal | Frontal |
-| Lateral.jpg | Normal | Lateral |
-| Frontal.png | Pneumonia | Frontal |
-| Lateral.png | Pneumonia | Lateral |
+| Class | Images | Source Total |
+|-------|--------|-------------|
+| COVID-19 | 100 | 3,616 |
+| Normal | 100 | 10,192 |
+| Lung Opacity | 100 | 6,012 |
+| Viral Pneumonia | 100 | 1,345 |
 
-### Classification Results (INT8)
-
-| Image | True Class | Top-1 Prediction | Score | Top-3 Clinical Hit | Top-5 Clinical Hit |
-|-------|-----------|-------------------|-------|--------------------|--------------------|
-| covid-19-paediatric | COVID-19 | normal chest x-ray | 0.413 | No | Yes (COVID #5) |
-| Frontal (normal) | Normal | normal chest x-ray | 0.419 | **Yes** | **Yes** |
-| Lateral (normal) | Normal | atelectasis | 0.401 | No | No |
-| Frontal (pneumonia) | Pneumonia | lung opacity | 0.411 | **Yes** (bacterial #2) | **Yes** |
-| Lateral (pneumonia) | Pneumonia | pneumothorax | 0.418 | **Yes** (bacterial #2) | **Yes** |
-
-### Aggregate Metrics
+### Aggregate Results
 
 | Metric | Value |
 |--------|-------|
-| Top-1 Exact Accuracy | 20% (1/5) |
-| Top-3 Clinical Hit Rate | 60% (3/5) |
-| Top-5 Clinical Hit Rate | 80% (4/5) |
-| Average Inference Time | 330.7 ms/image (desktop CPU) |
+| **Top-1 Exact Accuracy** | **31.0%** (124/400) |
+| **Top-3 Clinical Accuracy** | **87.5%** (350/400) |
+| **Top-5 Clinical Accuracy** | **98.8%** (395/400) |
+| Average Inference Time | 114 ms/image (desktop CPU) |
 
-**Interpretation**: Top-1 accuracy is low because zero-shot CLIP classification produces narrow score ranges (0.37–0.42) across 30 diverse medical conditions. However, the **Top-5 clinical hit rate of 80%** confirms that BiomedCLIP reliably surfaces the correct condition within its top candidates — which is exactly how MedLens uses it: as a pre-filter feeding context to MedGemma, not as a standalone classifier. The lateral X-ray miss is expected, as lateral views are underrepresented in medical image–text training data.
+### Per-Class Breakdown
+
+| Class | N | Top-1 | Top-3 Clinical | Top-5 Clinical |
+|-------|---|-------|----------------|----------------|
+| COVID-19 | 100 | 14.0% | 79.0% | 98.0% |
+| Lung Opacity | 100 | 12.0% | 97.0% | 100.0% |
+| Normal | 100 | 64.0% | 94.0% | 97.0% |
+| Viral Pneumonia | 100 | 34.0% | 80.0% | 100.0% |
+
+### Confusion Matrix (Top-1 Predictions)
+
+| True \ Predicted | covid19 | lung_opacity | normal | viral_pneumonia | other |
+|-----------------|---------|-------------|--------|-----------------|-------|
+| COVID-19 | **14** | 23 | 17 | 2 | 44 |
+| Lung Opacity | 1 | **12** | 6 | 0 | 81 |
+| Normal | 0 | 3 | **64** | 3 | 30 |
+| Viral Pneumonia | 0 | 1 | 17 | **34** | 48 |
+
+**Interpretation**: Top-1 accuracy is 31% because zero-shot CLIP classification over 30 diverse labels produces narrow score margins — many predictions fall into related but non-exact categories (e.g., "lung opacity" for pneumonia cases). The **top-5 clinical accuracy of 98.8%** is the critical metric: BiomedCLIP surfaces the correct or a clinically related condition in its top-5 for virtually every image. This is exactly how MedLens uses it — as a pre-filter feeding context to MedGemma, not as a standalone classifier. Normal X-rays have the highest top-1 (64%) since "normal chest x-ray" is a distinct label with less semantic overlap.
 
 ### Quantization Fidelity (INT8 vs FP32)
 
-| Image | Cosine Similarity | Max Absolute Diff | Top-1 Agreement |
-|-------|-------------------|-------------------|-----------------|
-| covid-19-paediatric | 0.99903 | 0.00642 | Yes |
-| Frontal (normal) | 0.99841 | 0.00743 | Yes |
-| Lateral (normal) | 0.99929 | 0.00598 | Yes |
-| Frontal (pneumonia) | 0.99919 | 0.00486 | No |
-| Lateral (pneumonia) | 0.99938 | 0.00462 | Yes |
+Tested on a separate 5-image set with both INT8 and FP32 models loaded simultaneously:
 
 | Aggregate | Value |
 |-----------|-------|
@@ -63,7 +65,7 @@ Quantitative evaluation of both edge-deployed models: **BiomedCLIP INT8** (zero-
 | Top-1 Agreement | 80% (4/5) |
 | Max Absolute Embedding Diff | 0.0074 |
 
-INT8 quantization preserves >99.9% of embedding fidelity. The single top-1 disagreement (pneumonia frontal) results from near-identical scores between "lung opacity" and "bacterial pneumonia" — both clinically relevant for the true condition.
+INT8 quantization preserves >99.9% of embedding fidelity.
 
 ---
 
@@ -141,19 +143,28 @@ INT8 quantization preserves >99.9% of embedding fidelity. The single top-1 disag
 pip install onnxruntime numpy Pillow llama-cpp-python
 ```
 
-### BiomedCLIP Evaluation
+### BiomedCLIP — Large-Scale (400 images)
 
 ```bash
-cd evaluation
-python biomedclip_classification_eval.py
+# 1. Download dataset from Kaggle and extract to evaluation/_raw_dataset/
+# 2. Sample 100 images per class:
+python evaluation/download_eval_dataset.py --skip-download --samples-per-class 100
+# 3. Run evaluation:
+python evaluation/biomedclip_dataset_eval.py
+# Output: results/biomedclip_dataset_results.json + results/biomedclip_dataset_results.txt
+```
+
+### BiomedCLIP — Quick test (5 images + fidelity)
+
+```bash
+python evaluation/biomedclip_classification_eval.py
 # Output: results/biomedclip_classification_results.json
 ```
 
 ### MedGemma Evaluation
 
 ```bash
-cd evaluation
-python medgemma_clinical_eval.py
+python evaluation/medgemma_clinical_eval.py
 # Output: results/medgemma_clinical_results.json
 # Note: Requires ~3GB RAM for model loading. ~3 minutes on CPU.
 ```
@@ -161,14 +172,15 @@ python medgemma_clinical_eval.py
 ### Results
 
 Pre-computed results are saved in [`results/`](results/) for reproducibility:
-- `biomedclip_classification_results.json` — per-image predictions, fidelity metrics
+- `biomedclip_dataset_results.json` / `.txt` — 400-image evaluation with per-class metrics and confusion matrix
+- `biomedclip_classification_results.json` — 5-image fidelity comparison (INT8 vs FP32)
 - `medgemma_clinical_results.json` — per-case outputs, rubric scores, generation stats
 
 ---
 
 ## Limitations
 
-- **Small test set**: 5 images limits statistical power. These results demonstrate pipeline correctness and qualitative behavior, not population-level accuracy.
-- **Zero-shot only**: BiomedCLIP is evaluated with pre-computed text embeddings (no fine-tuning). Fine-tuned models would perform significantly better.
+- **Zero-shot only**: BiomedCLIP is evaluated with pre-computed text embeddings (no fine-tuning). Fine-tuned models would perform significantly better on top-1 accuracy.
+- **Chest X-ray only (large-scale)**: The 400-image evaluation covers chest X-rays only. Dermatology and ophthalmology are evaluated qualitatively via MedGemma cases.
 - **Automated rubric**: MedGemma scoring uses keyword matching, not clinical expert review. Scores are indicative, not definitive quality measures.
 - **CPU inference**: Desktop CPU benchmarks differ from on-device (Snapdragon 8s Gen 3) performance. See [benchmarks/](../benchmarks/) for device-specific numbers.
