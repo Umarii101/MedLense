@@ -1,0 +1,56 @@
+BiomedCLIP Large-Scale Zero-Shot Classification Results
+============================================================
+
+Model:    biomedclip_vision_int8.onnx
+Dataset:  chest_xray_dataset
+Images:   400
+Errors:   0
+Avg Inference: 114 ms/image
+
+AGGREGATE METRICS
+----------------------------------------
+Top-1 Exact Accuracy:     31.0%  (124/400)
+Top-3 Clinical Accuracy:  87.5%  (350/400)
+Top-5 Clinical Accuracy:  98.8%  (395/400)
+
+PER-CLASS BREAKDOWN
+------------------------------------------------------------
+Class                    N    Top-1    Top-3    Top-5
+----------------------------------------------------
+covid19                100    14.0%    79.0%    98.0%
+lung_opacity           100    12.0%    97.0%   100.0%
+normal                 100    64.0%    94.0%    97.0%
+viral_pneumonia        100    34.0%    80.0%   100.0%
+
+CONFUSION MATRIX (Top-1 Predictions)
+------------------------------------------------------------
+True / Pred               covid19 lung_opacity       normal        other pneumonia_ge viral_pneumo
+--------------------------------------------------------------------------------------------------
+covid19                        14           23           17           44            0            2
+lung_opacity                    1           12            6           81            0            0
+normal                          0            3           64           30            0            3
+viral_pneumonia                 0            1           17           47            1           34
+
+
+GROUND TRUTH DEFINITIONS
+------------------------------------------------------------
+
+covid19:
+  Exact match: ['COVID-19 infection in chest x-ray']
+  Clinical top-3 acceptable: ['COVID-19 infection in chest x-ray', 'viral pneumonia in chest x-ray', 'pneumonia in chest x-ray', 'lung opacity in chest x-ray', 'pulmonary edema in chest x-ray']
+  Clinical top-5 acceptable: ['COVID-19 infection in chest x-ray', 'viral pneumonia in chest x-ray', 'pneumonia in chest x-ray', 'lung opacity in chest x-ray', 'pulmonary edema in chest x-ray', 'pleural effusion in chest x-ray', 'bacterial pneumonia in chest x-ray']
+
+lung_opacity:
+  Exact match: ['lung opacity in chest x-ray']
+  Clinical top-3 acceptable: ['lung opacity in chest x-ray', 'pneumonia in chest x-ray', 'bacterial pneumonia in chest x-ray', 'viral pneumonia in chest x-ray', 'pulmonary edema in chest x-ray', 'pleural effusion in chest x-ray']
+  Clinical top-5 acceptable: ['lung opacity in chest x-ray', 'pneumonia in chest x-ray', 'bacterial pneumonia in chest x-ray', 'viral pneumonia in chest x-ray', 'pulmonary edema in chest x-ray', 'pleural effusion in chest x-ray', 'atelectasis in chest x-ray', 'COVID-19 infection in chest x-ray']
+
+normal:
+  Exact match: ['normal chest x-ray']
+  Clinical top-3 acceptable: ['normal chest x-ray', 'normal healthy medical image']
+  Clinical top-5 acceptable: ['normal chest x-ray', 'normal healthy medical image']
+
+viral_pneumonia:
+  Exact match: ['viral pneumonia in chest x-ray']
+  Clinical top-3 acceptable: ['viral pneumonia in chest x-ray', 'pneumonia in chest x-ray', 'COVID-19 infection in chest x-ray', 'lung opacity in chest x-ray']
+  Clinical top-5 acceptable: ['viral pneumonia in chest x-ray', 'pneumonia in chest x-ray', 'COVID-19 infection in chest x-ray', 'lung opacity in chest x-ray', 'bacterial pneumonia in chest x-ray', 'pulmonary edema in chest x-ray']

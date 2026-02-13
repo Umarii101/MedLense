@@ -1,0 +1,209 @@
+{
+  "model": "BiomedCLIP-PubMedBERT_256-vit_base_patch16_224 (INT8 ONNX)",
+  "model_size_mb": 87.7,
+  "num_labels": 30,
+  "embedding_dim": 512,
+  "num_test_images": 5,
+  "top1_exact_accuracy": 20.0,
+  "top3_clinical_accuracy": 80.0,
+  "top5_clinical_accuracy": 80.0,
+  "avg_inference_ms": 330.7,
+  "per_image_results": [
+    {
+      "image": "covid-19-pneumonia-paediatric.jpg",
+      "true_class": "covid19",
+      "top1_label": "normal chest x-ray",
+      "top1_score": 0.4456,
+      "top1_correct": false,
+      "top3_hit": true,
+      "top5_hit": true,
+      "inference_ms": 309.2,
+      "top5_predictions": [
+        {
+          "label": "normal chest x-ray",
+          "score": 0.4456
+        },
+        {
+          "label": "normal healthy medical image",
+          "score": 0.4316
+        },
+        {
+          "label": "viral pneumonia in chest x-ray",
+          "score": 0.4249
+        },
+        {
+          "label": "pneumonia in chest x-ray",
+          "score": 0.4105
+        },
+        {
+          "label": "COVID-19 infection in chest x-ray",
+          "score": 0.3989
+        }
+      ]
+    },
+    {
+      "image": "Frontal.jpg",
+      "true_class": "normal",
+      "top1_label": "normal chest x-ray",
+      "top1_score": 0.4435,
+      "top1_correct": true,
+      "top3_hit": true,
+      "top5_hit": true,
+      "inference_ms": 273.3,
+      "top5_predictions": [
+        {
+          "label": "normal chest x-ray",
+          "score": 0.4435
+        },
+        {
+          "label": "pneumothorax in chest x-ray",
+          "score": 0.4305
+        },
+        {
+          "label": "normal healthy medical image",
+          "score": 0.4117
+        },
+        {
+          "label": "lung nodule in chest x-ray",
+          "score": 0.4044
+        },
+        {
+          "label": "tuberculosis in chest x-ray",
+          "score": 0.3972
+        }
+      ]
+    },
+    {
+      "image": "Lateral.jpg",
+      "true_class": "normal",
+      "top1_label": "atelectasis in chest x-ray",
+      "top1_score": 0.4014,
+      "top1_correct": false,
+      "top3_hit": false,
+      "top5_hit": false,
+      "inference_ms": 331.7,
+      "top5_predictions": [
+        {
+          "label": "atelectasis in chest x-ray",
+          "score": 0.4014
+        },
+        {
+          "label": "tuberculosis in chest x-ray",
+          "score": 0.3965
+        },
+        {
+          "label": "pneumothorax in chest x-ray",
+          "score": 0.3945
+        },
+        {
+          "label": "lung opacity in chest x-ray",
+          "score": 0.3886
+        },
+        {
+          "label": "pneumonia in chest x-ray",
+          "score": 0.3812
+        }
+      ]
+    },
+    {
+      "image": "Frontal.png",
+      "true_class": "pneumonia",
+      "top1_label": "lung opacity in chest x-ray",
+      "top1_score": 0.4113,
+      "top1_correct": false,
+      "top3_hit": true,
+      "top5_hit": true,
+      "inference_ms": 373.6,
+      "top5_predictions": [
+        {
+          "label": "lung opacity in chest x-ray",
+          "score": 0.4113
+        },
+        {
+          "label": "bacterial pneumonia in chest x-ray",
+          "score": 0.4103
+        },
+        {
+          "label": "tuberculosis in chest x-ray",
+          "score": 0.3882
+        },
+        {
+          "label": "lung nodule in chest x-ray",
+          "score": 0.3878
+        },
+        {
+          "label": "pneumonia in chest x-ray",
+          "score": 0.382
+        }
+      ]
+    },
+    {
+      "image": "Lateral.png",
+      "true_class": "pneumonia",
+      "top1_label": "pneumothorax in chest x-ray",
+      "top1_score": 0.4178,
+      "top1_correct": false,
+      "top3_hit": true,
+      "top5_hit": true,
+      "inference_ms": 365.7,
+      "top5_predictions": [
+        {
+          "label": "pneumothorax in chest x-ray",
+          "score": 0.4178
+        },
+        {
+          "label": "bacterial pneumonia in chest x-ray",
+          "score": 0.4031
+        },
+        {
+          "label": "tuberculosis in chest x-ray",
+          "score": 0.4006
+        },
+        {
+          "label": "pneumonia in chest x-ray",
+          "score": 0.3976
+        },
+        {
+          "label": "atelectasis in chest x-ray",
+          "score": 0.3948
+        }
+      ]
+    }
+  ],
+  "quantization_fidelity": {
+    "avg_cosine_similarity": 0.999058,
+    "top1_agreement_pct": 80.0,
+    "per_image": [
+      {
+        "image": "covid-19-pneumonia-paediatric.jpg",
+        "cosine_similarity": 0.999028,
+        "max_abs_diff": 0.006419,
+        "top1_agree": true
+      },
+      {
+        "image": "Frontal.jpg",
+        "cosine_similarity": 0.998405,
+        "max_abs_diff": 0.007428,
+        "top1_agree": true
+      },
+      {
+        "image": "Lateral.jpg",
+        "cosine_similarity": 0.999287,
+        "max_abs_diff": 0.005983,
+        "top1_agree": true
+      },
+      {
+        "image": "Frontal.png",
+        "cosine_similarity": 0.999192,
+        "max_abs_diff": 0.004858,
+        "top1_agree": false
+      },
+      {
+        "image": "Lateral.png",
+        "cosine_similarity": 0.99938,
+        "max_abs_diff": 0.004624,
+        "top1_agree": true
+      }
+    ]
+  }
+}

@@ -82,10 +82,13 @@ demo_image_output.json
 demo_multimodal_output.json
 outputs/
 edge_deployment/models.rar
-results/
 logs/
 temp/
 tmp/
+
+# Evaluation datasets (large, download via script)
+evaluation/_raw_dataset/
+evaluation/test_data/chest_xray_dataset/
 
 # ============================================
 # Testing and Development
