@@ -162,8 +162,7 @@ ALL TESTS PASSED ✅
 
 - **Competition**: [Kaggle MedGemma Impact Challenge](https://kaggle.com/competitions/med-gemma-impact-challenge)
 - **HAI-DEF Models**: [Google Health AI Developer Foundations](https://huggingface.co/google/medgemma-4b-it)
-- **Video Demo**: *See [Medlens/README.md](Medlens/README.md) for app walkthrough*
-
+- **Video Link**: " https://youtu.be/ZCZq52NL9NM "
 
 ## ⚠️ Medical Disclaimer
 
