@@ -25,7 +25,7 @@ local.properties
 build_log.txt
 flag_audit.txt
 *.log
-
+*.rar
 # ============================================
 # llama.cpp source (cloned separately)
 # ============================================
