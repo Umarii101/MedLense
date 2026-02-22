@@ -114,11 +114,13 @@ The Models that I have quantized are too large for Git. Download from Kaggle:
 | BiomedCLIP INT8 | 84 MB | 99.95% vs FP32 | 126 ms inference |
 | MedGemma Q4_K_S | 2.2 GB | High quality | 32.8 tok/s pp, 7.8 tok/s gen |
 
-### Model Quality Evaluation (see [evaluation/README.md](evaluation/README.md))
+
+### Model Quality Evaluation (400-image dataset — see evaluation/README.md)
 
 | Evaluation | Metric | Result |
 |------------|--------|--------|
-| BiomedCLIP Zero-Shot | Top-5 clinical hit rate | **80%** (4/5 test images) |
+| BiomedCLIP Zero-Shot (400 chest X-rays) | Top-5 clinical accuracy | **98.8%** (395/400) |
+| BiomedCLIP Zero-Shot (400 chest X-rays) | Top-3 clinical accuracy | **87.5%** (350/400) |
 | BiomedCLIP INT8 Fidelity | Cosine similarity vs FP32 | **0.9991** |
 | MedGemma Clinical Quality | Automated rubric (10-pt) | **8.6/10 EXCELLENT** |
 | MedGemma Safety | No absolute diagnostic claims | **100%** (5/5 cases) |
