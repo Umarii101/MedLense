@@ -6,7 +6,7 @@
 
 ```bash
 # Clone or download the project
-cd The-MedGemma-Impact-Challenge
+cd Medlense
 
 # Create virtual environment
 python -m venv venv

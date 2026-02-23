@@ -241,18 +241,6 @@ print(result.integrated_findings)
 print(result.next_steps)
 ```
 
-## 🎯 Competition Alignment
-
-### Kaggle MedGemma Impact Challenge Requirements
-
-✅ **Open-Weight Models**: All models from Hugging Face
-✅ **Local Inference**: No cloud APIs required
-✅ **MedGemma Showcase**: Primary LLM for clinical reasoning
-✅ **Real-World Application**: Low-resource clinical support
-✅ **Reproducible**: Complete code + documentation
-✅ **Safety-First**: Multiple safety mechanisms
-✅ **Structured Outputs**: JSON for integration
-
 ### Target Use Cases
 
 1. **Emergency Triage**: Quick patient assessment prioritization

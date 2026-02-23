@@ -1,4 +1,4 @@
-# MedGemma Impact Challenge - Project Summary
+# MedLens - Project Summary
 
 ## 🎯 Executive Summary
 
@@ -168,30 +168,6 @@ python desktop_pipeline/main.py
 # 4. Test edge deployment models
 python tests/run_all_tests.py
 ```
-
-## 🏆 Competition Alignment
-
-### MedGemma Impact Challenge Criteria
-
-| Criterion | Implementation | Status |
-|-----------|----------------|--------|
-| Uses MedGemma | MedGemma 4B-IT (primary LLM) | ✅ |
-| Open-weight models | All HuggingFace models | ✅ |
-| Offline capability | No cloud APIs required | ✅ |
-| Real-world impact | Low-resource healthcare focus | ✅ |
-| Safety mechanisms | 5-layer safety system | ✅ |
-| Code quality | Production-ready | ✅ |
-| Documentation | Comprehensive | ✅ |
-
-### Edge AI Prize ($5,000)
-
-| Requirement | Implementation | Status |
-|-------------|----------------|--------|
-| Mobile deployment | Android-optimized models | ✅ |
-| MedGemma quantized | Q4_K_S GGUF (2.2 GB) | ✅ |
-| Vision model | BiomedCLIP INT8 (84 MB) | ✅ |
-| Target device | Realme GT Neo 6 (SD 8s Gen 3) | ✅ |
-| Test validation | All tests passing | ✅ |
 
 ## ⚠️ Medical Disclaimer
 
