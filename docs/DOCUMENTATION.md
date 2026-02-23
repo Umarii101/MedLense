@@ -1,4 +1,4 @@
-# MedGemma Impact Challenge — Technical Documentation
+# MedLens — Technical Documentation
 
 ## 🎯 System Overview
 
