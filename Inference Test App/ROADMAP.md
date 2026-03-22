@@ -1,7 +1,7 @@
 # Roadmap — MedLens Android App
 
 > **Note:** This roadmap was written for the **proof-of-concept** test app (`android_app/`).
-> Many Phase 2 and Phase 4 goals have been **achieved** in the production app — see [`Medlens/README.md`](../Medlens/README.md).
+> Many Phase 2 and Phase 4 goals have been **achieved** in the production app — see [`Medlens/README.md`](../medlens/README.md).
 
 > Current status: **Proof-of-concept test app** — superseded by the production MedLens app.
 
