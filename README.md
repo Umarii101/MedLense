@@ -16,7 +16,7 @@
 | **MedGemma 4B-IT** | 8.6 GB | 2.2 GB | 74% |
 | **BiomedCLIP** | 329 MB | 84 MB | 74% |
 
-**Target**: Android devices — includes **[MedLens](Medlens/README.md)**, a production chat-based app with unified camera + gallery interface, combined BiomedCLIP → zero-shot classifier → MedGemma pipeline, streaming clinical assessments, and 30-condition medical classification — all running entirely on-device.
+**Target**: Android devices — includes **[MedLens](medlens/README.md)**, a production chat-based app with unified camera + gallery interface, combined BiomedCLIP → zero-shot classifier → MedGemma pipeline, streaming clinical assessments, and 30-condition medical classification — all running entirely on-device.
 
 ## 🚀 Quick Start
 
