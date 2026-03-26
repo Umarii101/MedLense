@@ -146,7 +146,7 @@ ALL TESTS PASSED ✅
 
 | Document | Description |
 |----------|-------------|
-| [Medlens/README.md](Medlens/README.md) | **⭐ MedLens app** — architecture, build instructions, pipeline details |
+| [Medlens/README.md](medlens/README.md) | **⭐ MedLens app** — architecture, build instructions, pipeline details |
 | [EDGE_DEPLOYMENT.md](EDGE_DEPLOYMENT.md) | Full edge deployment story — quantization approach & rationale |
 | [Inference Test App/DEPLOYMENT_TECHNICAL_REPORT.md](Inference%20Test%20App/DEPLOYMENT_TECHNICAL_REPORT.md) | Android build challenges & solutions (0.2 → 7.8 tok/s debugging) |
 | [Inference Test App/ROADMAP.md](Inference%20Test%20App/ROADMAP.md) | Optimization roadmap & future targets |
