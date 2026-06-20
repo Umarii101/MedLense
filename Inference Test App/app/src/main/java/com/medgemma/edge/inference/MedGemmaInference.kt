@@ -13,9 +13,86 @@ import java.io.File
  */
 class MedGemmaInference(private val context: Context) {
 
+    /** Role for chat messages. */
+    enum class Role { USER, MODEL, SYSTEM }
+
+    /** A single message in a conversation. */
+    data class ChatMessage(val role: Role, val content: String)
+
     companion object {
         private const val TAG = "MedGemma"
         private const val MODEL_FILENAME = "medgemma-4b-q4_k_s-final.gguf"
+
+        /** Default medical system prompt. */
+        const val MEDICAL_SYSTEM_PROMPT =
+            "You are a medical AI assistant that is part of an on-device clinical pipeline. " +
+            "A separate vision model (BiomedCLIP) has already analyzed the medical image and " +
+            "provided classification results. You will receive these pre-computed findings as text. " +
+            "Your role is to interpret the classification results, explain the likely condition, " +
+            "provide differential diagnoses, and suggest next steps. " +
+            "Provide clear, evidence-based information. " +
+            "Always recommend consulting a healthcare professional for diagnosis and treatment."
+
+        /**
+         * Format a conversation into Gemma 3 chat template.
+         *
+         * Template: <start_of_turn>user\n{text}<end_of_turn>\n<start_of_turn>model\n
+         * System messages are prepended to the first user turn.
+         * BOS token is added by the tokenizer (add_special=true in C++).
+         */
+        fun formatChatPrompt(
+            messages: List<ChatMessage>,
+            systemPrompt: String? = MEDICAL_SYSTEM_PROMPT
+        ): String {
+            val sb = StringBuilder()
+            var firstUserPrefix = ""
+            val loopMessages: List<ChatMessage>
+
+            // Handle system prompt: prepend to first user message
+            if (systemPrompt != null && systemPrompt.isNotBlank()) {
+                firstUserPrefix = systemPrompt + "\n\n"
+                loopMessages = messages
+            } else if (messages.isNotEmpty() && messages[0].role == Role.SYSTEM) {
+                firstUserPrefix = messages[0].content + "\n\n"
+                loopMessages = messages.drop(1)
+            } else {
+                loopMessages = messages
+            }
+
+            var isFirst = true
+            for (msg in loopMessages) {
+                val role = when (msg.role) {
+                    Role.USER -> "user"
+                    Role.MODEL -> "model"
+                    Role.SYSTEM -> "user"
+                }
+                sb.append("<start_of_turn>")
+                sb.append(role)
+                sb.append("\n")
+                if (isFirst && firstUserPrefix.isNotEmpty()) {
+                    sb.append(firstUserPrefix)
+                    isFirst = false
+                }
+                sb.append(msg.content.trim())
+                sb.append("<end_of_turn>\n")
+            }
+            // Add generation prompt
+            sb.append("<start_of_turn>model\n")
+            return sb.toString()
+        }
+
+        /**
+         * Format a simple single-turn prompt with system context.
+         */
+        fun formatSimplePrompt(
+            userMessage: String,
+            systemPrompt: String? = MEDICAL_SYSTEM_PROMPT
+        ): String {
+            return formatChatPrompt(
+                listOf(ChatMessage(Role.USER, userMessage)),
+                systemPrompt
+            )
+        }
 
         @Volatile
         private var libraryLoaded = false
@@ -107,6 +184,34 @@ class MedGemmaInference(private val context: Context) {
     fun generate(prompt: String, maxTokens: Int = 128): String {
         check(isLoaded) { "Model not loaded. Call loadModel() first." }
         return nativeGenerate(prompt, maxTokens)
+    }
+
+    /**
+     * Generate with Gemma 3 chat template applied.
+     * Wraps the user message with proper <start_of_turn>/<end_of_turn> tokens
+     * and a system prompt so MedGemma responds as an instruction-following model.
+     */
+    fun generateWithTemplate(
+        userMessage: String,
+        maxTokens: Int = 256,
+        systemPrompt: String? = MEDICAL_SYSTEM_PROMPT
+    ): String {
+        val formatted = formatSimplePrompt(userMessage, systemPrompt)
+        Log.d(TAG, "Formatted prompt (${formatted.length} chars)")
+        return generate(formatted, maxTokens)
+    }
+
+    /**
+     * Generate from a multi-turn conversation with chat template.
+     */
+    fun generateFromConversation(
+        messages: List<ChatMessage>,
+        maxTokens: Int = 256,
+        systemPrompt: String? = MEDICAL_SYSTEM_PROMPT
+    ): String {
+        val formatted = formatChatPrompt(messages, systemPrompt)
+        Log.d(TAG, "Formatted conversation (${messages.size} turns, ${formatted.length} chars)")
+        return generate(formatted, maxTokens)
     }
 
     /**

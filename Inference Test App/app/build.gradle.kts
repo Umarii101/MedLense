@@ -67,6 +67,12 @@ dependencies {
     implementation(libs.androidx.compose.ui.tooling.preview)
     implementation(libs.androidx.compose.material3)
 
+    // Material Icons Extended (CameraAlt, Stop, Image, etc.)
+    implementation("androidx.compose.material:material-icons-extended")
+
+    // OkHttp for Cloud API streaming
+    implementation("com.squareup.okhttp3:okhttp:4.12.0")
+
     // ONNX Runtime for BiomedCLIP inference
     implementation("com.microsoft.onnxruntime:onnxruntime-android:1.19.0")
 
@@ -75,6 +81,22 @@ dependencies {
 
     // Image loading
     implementation("io.coil-kt:coil-compose:2.5.0")
+
+    // CameraX for live camera capture
+    val cameraxVersion = "1.3.4"
+    implementation("androidx.camera:camera-core:$cameraxVersion")
+    implementation("androidx.camera:camera-camera2:$cameraxVersion")
+    implementation("androidx.camera:camera-lifecycle:$cameraxVersion")
+    implementation("androidx.camera:camera-view:$cameraxVersion")
+
+    // ViewModel Compose integration
+    implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.8.7")
+
+    // Navigation Compose
+    implementation("androidx.navigation:navigation-compose:2.8.5")
+
+    // JSON parsing for embeddings
+    implementation("com.google.code.gson:gson:2.11.0")
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)

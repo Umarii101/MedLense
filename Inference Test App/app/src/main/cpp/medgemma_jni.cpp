@@ -177,8 +177,8 @@ Java_com_medgemma_edge_inference_MedGemmaInference_nativeGenerate(
     std::string prompt(prompt_cstr);
     env->ReleaseStringUTFChars(jPrompt, prompt_cstr);
 
-    // Tokenize
-    std::vector<llama_token> tokens = common_tokenize(g_context, prompt, true);
+    // Tokenize (parse_special=true so <start_of_turn>, <end_of_turn> are recognized)
+    std::vector<llama_token> tokens = common_tokenize(g_context, prompt, true, true);
     LOGi("Prompt tokens: %zu", tokens.size());
 
     if (tokens.empty()) {
