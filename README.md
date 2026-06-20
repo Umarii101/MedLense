@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 # MedLens: Offline Clinical AI for Low-Resource Settings
 
 > **Kaggle MedGemma Impact Challenge** — Edge AI Submission
