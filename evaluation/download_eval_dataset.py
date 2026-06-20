@@ -31,7 +31,6 @@ CLASS_MAP = {
 
 EVAL_DIR = Path(__file__).parent.parent / "evaluation" / "test_data" / "chest_xray_dataset"
 
-
 def download_dataset(dest: Path):
     """Download full dataset via Kaggle API."""
     try:
@@ -47,7 +46,6 @@ def download_dataset(dest: Path):
     print(f"Destination: {dest}")
     api.dataset_download_files(DATASET, path=str(dest), unzip=True)
     print("Download complete.")
-
 
 def find_image_dirs(dest: Path) -> dict:
     """Find the image directories for each class."""
