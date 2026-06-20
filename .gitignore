@@ -54,21 +54,33 @@ Thumbs.db
 *.ipynb_checkpoints/
 .ipykernel.killer
 
-# ============================================
-# Model Files (Large - Download Separately)
-# ============================================
-# HuggingFace cache
-.cache/
-huggingface_cache/
-model_cache/
+# Large model files (GGUF, ONNX) – do not commit
+*.gguf
+*.onnx
 
-# Desktop model weights (downloaded on demand)
-models/checkpoints/
-models/pretrained/
-*.bin
-*.h5
+# Python cache
+__pycache__/
+*.pyc
 
-# Edge deployment models (too large for Git)
+# Virtual environments
+venv/
+env/
+medlens-env/
+
+# Android build outputs
+build/
+app/build/
+*.apk
+*.aab
+
+# IDE
+.vscode/
+.idea/
+
+# OS files
+.DS_Store
+
+# Large model files (GGUF, ONNX)
 edge_deployment/models/biomedclip/*.onnx
 edge_deployment/models/medgemma/*.gguf
 

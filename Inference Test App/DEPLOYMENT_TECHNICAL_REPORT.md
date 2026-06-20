@@ -248,6 +248,9 @@ android_app/
 - Android Studio (Ladybug+) with NDK 28.x and CMake 3.22.1
 - llama.cpp source cloned adjacent to the android_app (see `CMakeLists.txt` for expected path)
 
+## 10. Cloud Integration
+The edge pipeline described above operates entirely offline. For more complex cases, the app can offload queries to the cloud backend (see the MedLensPlus repository). The routing logic and cloud inference are covered separately; the edge deployment remains unchanged when cloud mode is used.
+
 ### Build
 ```bash
 # Clone llama.cpp (if not already present)
